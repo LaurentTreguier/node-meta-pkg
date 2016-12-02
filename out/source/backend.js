@@ -1,8 +1,10 @@
 'use strict';
-import * as util from './util';
+const util = require("./util");
 class Backend {
     get available() {
         return util.checkExistence(this.command) && this.platforms.indexOf(process.platform) !== -1;
     }
 }
-export default Backend;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Backend;
+//# sourceMappingURL=backend.js.map

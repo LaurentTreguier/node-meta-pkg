@@ -1,7 +1,7 @@
 'use strict';
-import * as fs from 'fs';
-import * as path from 'path';
-export function checkExistence(command) {
+const fs = require("fs");
+const path = require("path");
+function checkExistence(command) {
     let isWin = process.platform === 'win32';
     let exists = false;
     process.env.PATH.split(isWin ? ';' : ':').forEach((dir) => {
@@ -16,3 +16,5 @@ export function checkExistence(command) {
     });
     return exists;
 }
+exports.checkExistence = checkExistence;
+//# sourceMappingURL=util.js.map

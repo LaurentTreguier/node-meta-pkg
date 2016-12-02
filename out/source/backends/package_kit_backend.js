@@ -1,8 +1,8 @@
 'use strict';
-import * as cp from 'child_process';
-import * as rl from 'readline';
-import Backend from '../backend';
-class PackageKitBackend extends Backend {
+const cp = require("child_process");
+const rl = require("readline");
+const backend_1 = require("../backend");
+class PackageKitBackend extends backend_1.default {
     get prettyName() {
         return 'PackageKit';
     }
@@ -29,4 +29,6 @@ class PackageKitBackend extends Backend {
             .on('exit', resolve))).then(() => undefined);
     }
 }
-export default PackageKitBackend;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = PackageKitBackend;
+//# sourceMappingURL=package_kit_backend.js.map

@@ -1,7 +1,7 @@
 'use strict';
-import * as cp from 'child_process';
-import Backend from '../backend';
-class BrewBackend extends Backend {
+const cp = require("child_process");
+const backend_1 = require("../backend");
+class BrewBackend extends backend_1.default {
     get prettyName() {
         return 'Brew';
     }
@@ -21,4 +21,6 @@ class BrewBackend extends Backend {
         });
     }
 }
-export default BrewBackend;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = BrewBackend;
+//# sourceMappingURL=brew_backend.js.map

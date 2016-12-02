@@ -1,5 +1,5 @@
 'use strict';
-import * as request from 'request';
+const request = require("request");
 class RepoManager {
     constructor() {
         this._repos = [];
@@ -17,4 +17,6 @@ class RepoManager {
         })));
     }
 }
-export default RepoManager;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = RepoManager;
+//# sourceMappingURL=repo_manager.js.map
