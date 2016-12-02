@@ -1,5 +1,8 @@
 interface Package {
     targets: string[];
-    backends: any;
+    backends: {
+        packagekit?: string[];
+        brew?: string;
+    };
 }
 export default Package;
