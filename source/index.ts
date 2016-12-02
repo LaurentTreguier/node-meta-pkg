@@ -30,7 +30,7 @@ export class Installer {
     private _package: Package;
 
     get name() {
-        return this._backend.name;
+        return this._backend.prettyName;
     }
 
     constructor(backend: Backend, pkg: any) {
@@ -42,7 +42,8 @@ export class Installer {
         let packageInstalled = this._package.targets.every(util.checkExistence);
 
         return packageInstalled
-            ? Promise.resolve()
-            : this._backend.install(this._package.backends[this._backend.name]);
+            ? Promise.resolve(true)
+            : this._backend.install(this._package.backends[this._backend.name])
+                .then(() => false);
     }
 };
