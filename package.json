@@ -1,26 +1,26 @@
 {
-    "name": "meta-pkg",
-    "version": "0.1.0",
-    "description": "A way to install software natively in a cross-platform manner.",
-    "main": "out/source/index.js",
-    "files": [
-        "out/source"
-    ],
-    "typings": "out/source/index.d.ts",
-    "scripts": {
-        "compile": "node ./node_modules/.bin/tsc -watch -p ./",
-        "typings": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outDir out/source"
-    },
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/LaurentTreguier/meta-pkg"
-    },
-    "author": "LaurentTreguier <laurent@treguier.org>",
-    "license": "GPL-3.0",
-    "devDependencies": {
-        "typescript": "^2.0.10",
-        "@types/node": "^6.0.51",
-        "request": "^2.79.0",
-        "@types/request": "^0.0.34"
-    }
+  "name": "meta-pkg",
+  "version": "0.1.1",
+  "description": "A way to install software natively in a cross-platform manner.",
+  "main": "out/source/index.js",
+  "files": [
+    "out/source"
+  ],
+  "typings": "out/source/index.d.ts",
+  "scripts": {
+    "compile": "node ./node_modules/.bin/tsc -watch -p ./",
+    "typings": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outDir out/source"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/LaurentTreguier/meta-pkg"
+  },
+  "author": "LaurentTreguier <laurent@treguier.org>",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "typescript": "^2.0.10",
+    "@types/node": "^6.0.51",
+    "request": "^2.79.0",
+    "@types/request": "^0.0.34"
+  }
 }
