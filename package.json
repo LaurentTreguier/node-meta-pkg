@@ -9,7 +9,7 @@
     "typings": "out/source/index.d.ts",
     "scripts": {
         "compile": "node ./node_modules/.bin/tsc -watch -p ./",
-        "typings": "tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outDir out"
+        "typings": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outDir out/source"
     },
     "repository": {
         "type": "git",
