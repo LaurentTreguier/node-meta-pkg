@@ -49,6 +49,7 @@ Packages are simple JSON files. Two mains fields are required: `targets` and `ba
 The rest of the backends will be documented when they are actually implemented.
 
 ## API
+As the API is written in Typescript, typings are automatically generated and provided with the module.
 
 ### `function getInstallers(packageName: string): Installer[]`
 Returns an array of installers for the package with the name `packageName`.
