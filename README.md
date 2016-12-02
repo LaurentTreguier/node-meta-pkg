@@ -53,11 +53,17 @@ The rest of the backends will be documented when they are actually implemented.
 ### `function getInstallers(packageName: string): Installer[]`
 Returns an array of installers for the package with the name `packageName`.
 
-### `function getInstallers(package: {}): Installer[]`
+### `function getInstallers(p: Package): Installer[]`
 Returns an array of installers for the package.
 
 ### `function addRepo(url: string): void`
 Adds a repository to fetch packages. A repository are simply URLs that can provide packages when concatenating it with [packageName].json. `http://www.example.com/repo` is a valid repository URL if `http//www.example.com/repo/foobar.json` is a pakage JSON.
+
+### `interface Package`
+Members:
+- `targets`
+- `backends`
+See the Backends paragraph above
 
 ### `interface Installer`
 This interface has two members:
