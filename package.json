@@ -17,10 +17,12 @@
     },
     "author": "LaurentTreguier <laurent@treguier.org>",
     "license": "GPL-3.0",
+    "dependencies": {
+        "request": "^2.79.0"
+    },
     "devDependencies": {
         "typescript": "^2.0.10",
         "@types/node": "^6.0.51",
-        "request": "^2.79.0",
         "@types/request": "^0.0.34"
     }
 }
