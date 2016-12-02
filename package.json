@@ -17,8 +17,8 @@
     ],
     "typings": "out/source/index.d.ts",
     "scripts": {
-        "compile": "node ./node_modules/.bin/tsc -t 'ES2015' -watch -p ./",
-        "typings": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outDir out/source"
+        "compile": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d -watch -p ./",
+        "prepublish": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outdir out/source"
     },
     "repository": {
         "type": "git",
