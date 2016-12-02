@@ -72,4 +72,4 @@ See the Backends paragraph just above.
 ### `interface Installer`
 This interface has two members:
 - `name`: the name of the backend used for this installer
-- `install()`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either true if the package is already installed or false if it had tobe installed
+- `install()`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either false if the package is already installed or true after the package is installed

@@ -53,8 +53,8 @@ export class Installer {
         let packageInstalled = this._package.targets.every(util.checkExistence);
 
         return packageInstalled
-            ? Promise.resolve(true)
+            ? Promise.resolve(false)
             : this._backend.install(this._package.backends[this._backend.name])
-                .then(() => false);
+                .then(() => true);
     }
 };
