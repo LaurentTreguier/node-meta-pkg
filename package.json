@@ -4,7 +4,7 @@
     "description": "A way to install software natively in a cross-platform manner.",
     "main": "out/source/index.js",
     "files": [
-        "source"
+        "out/source"
     ],
     "typings": "out/source/index.d.ts",
     "scripts": {
