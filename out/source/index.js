@@ -1,11 +1,11 @@
 'use strict';
 const repo_manager_1 = require("./repo_manager");
-const packagekit_backend_1 = require("./backends/packagekit_backend");
+const package_kit_backend_1 = require("./backends/package_kit_backend");
 const brew_backend_1 = require("./backends/brew_backend");
 const util = require("./util");
 const repoManager = new repo_manager_1.default();
 const backends = [
-    new packagekit_backend_1.default(),
+    new package_kit_backend_1.default(),
     new brew_backend_1.default()
 ].filter((backend) => backend.available);
 function getInstallers(packageInfo) {

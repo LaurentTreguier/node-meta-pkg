@@ -3,13 +3,13 @@
 import Package from './package';
 import RepoManager from './repo_manager';
 import Backend from './backend';
-import PackagekitBackend from './backends/packagekit_backend';
+import PackageKitBackend from './backends/package_kit_backend';
 import BrewBackend from './backends/brew_backend';
 import * as util from './util';
 
 const repoManager = new RepoManager();
 const backends: Backend[] = [
-    new PackagekitBackend(),
+    new PackageKitBackend(),
     new BrewBackend()
 ].filter((backend) => backend.available);
 
