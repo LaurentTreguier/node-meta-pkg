@@ -60,13 +60,16 @@ Returns an array of installers for the package.
 ### `function addRepo(url: string): void`
 Adds a repository to fetch packages. A repository are simply URLs that can provide packages when concatenating it with [packageName].json. `http://www.example.com/repo` is a valid repository URL if `http//www.example.com/repo/foobar.json` is a pakage JSON.
 
+### `type PackageInfo = string | Package`
+Represents a package either by its name if it is available in a repository, or by a raw package instance.
+
 ### `interface Package`
 Members:
 - `targets`
 - `backends`
-See the Backends paragraph above
+See the Backends paragraph just above.
 
 ### `interface Installer`
 This interface has two members:
 - `name`: the name of the backend used for this installer
-- `install()`: a function that returns a `Promise` which is resolved when the package is intalled
+- `install()`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either true if the package is already installed or false if it had tobe installed

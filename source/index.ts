@@ -13,16 +13,27 @@ const backends: Backend[] = [
     new BrewBackend()
 ].filter((backend) => backend.available);
 
-export function getInstallers(packageInfo: string | Package): PromiseLike<Installer[]> {
-    let promise = typeof (packageInfo) === 'string'
-        ? repoManager.getPackage(packageInfo)
-        : Promise.resolve(packageInfo);
-    return promise.then((pkg) => backends.filter((backend) => pkg.backends[backend.name])
+export type PackageInfo = string | Package;
+
+export function isInstalled(packageInfo: PackageInfo) {
+    return getPackage(packageInfo).then((pkg) => {
+        return pkg.targets.every(util.checkExistence);
+    });
+};
+
+export function getInstallers(packageInfo: PackageInfo) {
+    return getPackage(packageInfo).then((pkg) => backends.filter((backend) => pkg.backends[backend.name])
         .map((backend) => new Installer(backend, pkg)));
 };
 
 export function addRepo(repo: string) {
     repoManager.addRepo(repo);
+};
+
+function getPackage(packageInfo: PackageInfo) {
+    return typeof (packageInfo) === 'string'
+        ? repoManager.getPackage(packageInfo)
+        : Promise.resolve(packageInfo);
 }
 
 export class Installer {
