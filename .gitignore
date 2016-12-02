@@ -1,4 +1,5 @@
 node_modules
-**/*.map
+out/**/*.map
+out/typings/**/*.js
 .vscode
 .vscodeignore

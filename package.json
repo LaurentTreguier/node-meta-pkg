@@ -12,13 +12,13 @@
         "linuxbrew"
     ],
     "main": "out/source/index.js",
+    "typings": "out/typings/index.d.ts",
     "files": [
-        "out/source"
+        "out"
     ],
-    "typings": "out/source/index.d.ts",
     "scripts": {
-        "compile": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d -watch -p ./",
-        "prepublish": "node ./node_modules/.bin/tsc -t 'ES2015' --moduleResolution node -d ./source/index.ts --outdir out/source"
+        "compile": "node ./node_modules/.bin/tsc -t ES2015 --moduleResolution node -watch -p ./",
+        "prepublish": "node ./node_modules/.bin/tsc -t ES2015 --moduleResolution node -d ./source/index.ts --outdir out/typings"
     },
     "repository": {
         "type": "git",
