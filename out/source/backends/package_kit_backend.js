@@ -13,9 +13,9 @@ class PackageKitBackend extends backend_1.default {
         return 'pkcon';
     }
     get platforms() {
-        return ['linux'];
+        return ['freebsd', 'linux'];
     }
-    install(packageNames) {
+    install(packageNames, outputListener) {
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);
@@ -26,7 +26,8 @@ class PackageKitBackend extends backend_1.default {
             });
             reader.on('close', resolve.bind(null, ''));
         }))).then((names) => new Promise((resolve) => cp.spawn(this.command, ['--plain', '--noninteractive', 'install', names.find((name) => name.length > 0)])
-            .on('exit', resolve))).then(() => undefined);
+            .on('exit', resolve)
+            .stdout.on('data', outputListener))).then(() => undefined);
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });

@@ -32,18 +32,18 @@ function getPackage(packageInfo) {
         : Promise.resolve(packageInfo);
 }
 class Installer {
+    get name() {
+        return this._backend.prettyName;
+    }
     constructor(backend, pkg) {
         this._backend = backend;
         this._package = pkg;
     }
-    get name() {
-        return this._backend.prettyName;
-    }
-    install() {
+    install(outputListener) {
         let packageInstalled = this._package.targets.every(util.checkExistence);
         return packageInstalled
             ? Promise.resolve(false)
-            : this._backend.install(this._package.backends[this._backend.name])
+            : this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }))
                 .then(() => true);
     }
 }

@@ -18,10 +18,10 @@ class PackageKitBackend extends Backend {
     }
 
     get platforms() {
-        return ['linux'];
+        return ['freebsd', 'linux'];
     }
 
-    install(packageNames: string[]) {
+    install(packageNames: string[], outputListener: (chunk) => void) {
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);
@@ -36,6 +36,7 @@ class PackageKitBackend extends Backend {
         }))).then((names: string[]) => new Promise((resolve) =>
             cp.spawn(this.command, ['--plain', '--noninteractive', 'install', names.find((name) => name.length > 0)])
                 .on('exit', resolve)
+                .stdout.on('data', outputListener)
         )).then(() => undefined);
     }
 }

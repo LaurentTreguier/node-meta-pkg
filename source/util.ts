@@ -17,5 +17,5 @@ export function checkExistence(command: string) {
         }
     });
 
-    return exists;
+    return exists || !command;
 }

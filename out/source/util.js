@@ -14,7 +14,7 @@ function checkExistence(command) {
             catch (e) { }
         }
     });
-    return exists;
+    return exists || !command;
 }
 exports.checkExistence = checkExistence;
 //# sourceMappingURL=util.js.map

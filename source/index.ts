@@ -49,12 +49,12 @@ export class Installer {
         this._package = pkg;
     }
 
-    install() {
+    install(outputListener?: (chunk) => void) {
         let packageInstalled = this._package.targets.every(util.checkExistence);
 
         return packageInstalled
             ? Promise.resolve(false)
-            : this._backend.install(this._package.backends[this._backend.name])
+            : this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }))
                 .then(() => true);
     }
 };

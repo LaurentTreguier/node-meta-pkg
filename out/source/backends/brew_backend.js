@@ -14,10 +14,11 @@ class BrewBackend extends backend_1.default {
     get platforms() {
         return ['darwin', 'linux'];
     }
-    install(packageName) {
+    install(packageName, outputListener) {
         return new Promise((resolve) => {
             cp.spawn(this.command, ['install', packageName])
-                .on('exit', resolve);
+                .on('exit', resolve)
+                .stdout.on('data', outputListener);
         });
     }
 }
