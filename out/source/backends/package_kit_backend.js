@@ -25,9 +25,17 @@ class PackageKitBackend extends backend_1.default {
                 }
             });
             reader.on('close', resolve.bind(null, ''));
-        }))).then((names) => new Promise((resolve) => cp.spawn(this.command, ['--plain', '--noninteractive', 'install', names.find((name) => name.length > 0)])
-            .on('exit', resolve)
-            .stdout.on('data', outputListener))).then(() => undefined);
+        }))).then((names) => new Promise((resolve) => {
+            let name = names.find((name) => name.length > 0);
+            if (name) {
+                cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
+                    .on('exit', resolve)
+                    .stdout.on('data', outputListener);
+            }
+            else {
+                resolve();
+            }
+        })).then(() => undefined);
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
