@@ -72,4 +72,4 @@ See the Backends paragraph just above.
 ### `interface Installer`
 This interface has two members:
 - `name`: the name of the backend used for this installer
-- `install()`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either false if the package is already installed or true after the package is installed
+- `install(outputListener?: (chunk) => void)`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either false if the package is already installed or true after the package is installed. The `outputListener` parameter is an optional function that will receive the process' output chnk by chunk when installing the package (useful for displaying progress information)
