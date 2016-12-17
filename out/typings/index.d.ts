@@ -9,5 +9,5 @@ export declare class Installer {
     private _package;
     readonly name: string;
     constructor(backend: Backend, pkg: any);
-    install(): PromiseLike<boolean>;
+    install(outputListener?: (chunk) => void): PromiseLike<boolean>;
 }

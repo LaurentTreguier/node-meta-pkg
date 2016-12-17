@@ -4,6 +4,6 @@ declare class PackageKitBackend extends Backend {
     readonly name: string;
     readonly command: string;
     readonly platforms: string[];
-    install(packageNames: string[]): Promise<any>;
+    install(packageNames: string[], outputListener: (chunk) => void): Promise<any>;
 }
 export default PackageKitBackend;

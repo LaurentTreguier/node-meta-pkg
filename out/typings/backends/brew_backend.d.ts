@@ -4,6 +4,6 @@ declare class BrewBackend extends Backend {
     readonly name: string;
     readonly command: string;
     readonly platforms: string[];
-    install(packageName: string): Promise<void>;
+    install(packageName: string, outputListener: (chunk) => void): Promise<void>;
 }
 export default BrewBackend;
