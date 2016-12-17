@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "compile": "node ./node_modules/.bin/tsc -t ES2015 --moduleResolution node -watch -p ./",
-    "prepublish": "node ./node_modules/.bin/tsc -t ES2015 --moduleResolution node -d ./source/index.ts --outdir out/typings"
+    "preversion": "node ./node_modules/.bin/tsc -t ES2015 --moduleResolution node -d ./source/index.ts --outdir out/typings"
   },
   "repository": {
     "type": "git",
