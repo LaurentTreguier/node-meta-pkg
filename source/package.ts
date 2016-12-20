@@ -4,7 +4,8 @@ interface Package {
     targets: string[];
     backends: {
         packagekit?: string[],
-        brew?: string
+        brew?: string,
+        chocolatey?: string
     };
 };
 

@@ -5,12 +5,14 @@ import RepoManager from './repo_manager';
 import Backend from './backend';
 import PackageKitBackend from './backends/package_kit_backend';
 import BrewBackend from './backends/brew_backend';
+import ChocolateyBackend from './backends/chocolatey_backend';
 import * as util from './util';
 
 const repoManager = new RepoManager();
 const backends: Backend[] = [
     new PackageKitBackend(),
-    new BrewBackend()
+    new BrewBackend(),
+    new ChocolateyBackend()
 ].filter((backend) => backend.available);
 
 export type PackageInfo = string | Package;
@@ -50,7 +52,8 @@ export class Installer {
     }
 
     install(outputListener?: (chunk) => void) {
-        let packageInstalled = this._package.targets.every(util.checkExistence);
+        let packageInstalled = this._package.targets.length
+            && this._package.targets.every(util.checkExistence);
 
         return packageInstalled
             ? Promise.resolve(false)
