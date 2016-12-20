@@ -2,12 +2,12 @@
 
 Meta-pkg is a simple node module that can install software using native means.
 
-|OS|PackageKit|Download|Homebrew/Linuxbrew|Fallback|
-|---|---|---|---|---|
-|Windows||planned||planned|
-|MacOS||planned|yes|planned|
-|Linux|yes|planned|yes|planned|
-|FreeBSD|yes|||planned|
+|OS|PackageKit|Download|Homebrew/Linuxbrew|Chocolatey|Fallback|
+|---|---|---|---|---|---|
+|Windows||planned||partial|planned|
+|MacOS||planned|yes||planned|
+|Linux|yes|planned|yes||planned|
+|FreeBSD|yes||||planned|
 
 ## The structure of a package
 
@@ -25,18 +25,7 @@ Packages are simple JSON files. Two mains fields are required: `targets` and `ba
             "win32": "www.example.com/downloads/foobar-1.0.0.msi",
             "linux": "www.example.com/downloads/foobar-1.0.0.rpm"
         },
-        "brew": "foobar",
-        "fallback": {
-            "darwin": {
-                "source": "www.example.com/downloads/foobar-1.0.0.tar.gz",
-                "build": [
-                    {
-                        "cwd": "$srcdir/foobar-1.0.0",
-                        "command": "make"
-                    }
-                ]
-            }
-        }
+        "brew": "foobar"
     }
 }
 ```
@@ -73,3 +62,7 @@ See the Backends paragraph just above.
 This interface has two members:
 - `name`: the name of the backend used for this installer
 - `install(outputListener?: (chunk) => void)`: a function that returns a `Promise` which is resolved when the package is intalled ; the said promise return either false if the package is already installed or true after the package is installed. The `outputListener` parameter is an optional function that will receive the process' output chnk by chunk when installing the package (useful for displaying progress information)
+
+## Known issues
+
+The Chocolatey backend will not output anything during installation. The installation itself should still work fine.
