@@ -6,7 +6,7 @@ Meta-pkg is a simple node module that can install software using native means.
 |---|---|---|---|---|---|
 |Windows||planned||partial|planned|
 |MacOS||planned|yes||planned|
-|Linux|yes|planned|yes||planned|
+|Linux|yes||yes||planned|
 |FreeBSD|yes||||planned|
 
 ## The structure of a package
@@ -22,8 +22,7 @@ Packages are simple JSON files. Two mains fields are required: `targets` and `ba
         "packagekit": ["foo", "Foo"],
         "download": {
             "darwin": "www.example.com/downloads/foobar-1.0.0.dmg",
-            "win32": "www.example.com/downloads/foobar-1.0.0.msi",
-            "linux": "www.example.com/downloads/foobar-1.0.0.rpm"
+            "win32": "www.example.com/downloads/foobar-1.0.0.msi"
         },
         "brew": "foobar"
     }
