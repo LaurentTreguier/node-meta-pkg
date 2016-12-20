@@ -4,12 +4,12 @@ import * as cp from 'child_process';
 import Backend from '../backend';
 
 class BrewBackend extends Backend {
-    get prettyName() {
-        return 'Brew';
-    }
-
     get name() {
         return 'brew';
+    }
+
+    get prettyName() {
+        return 'Brew';
     }
 
     get command() {

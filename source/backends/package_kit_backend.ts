@@ -5,12 +5,12 @@ import * as rl from 'readline';
 import Backend from '../backend';
 
 class PackageKitBackend extends Backend {
-    get prettyName() {
-        return 'PackageKit';
-    }
-
     get name() {
         return 'packagekit';
+    }
+
+    get prettyName() {
+        return 'PackageKit';
     }
 
     get command() {

@@ -5,8 +5,8 @@ import * as path from 'path';
 import * as util from './util';
 
 abstract class Backend {
-    abstract get prettyName(): string;
     abstract get name(): string;
+    abstract get prettyName(): string;
     abstract get command(): string;
     abstract get platforms(): string[];
     abstract install(packageInfo: any, outputListener: (chunk) => void): PromiseLike<void>;

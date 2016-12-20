@@ -3,11 +3,11 @@ const cp = require("child_process");
 const rl = require("readline");
 const backend_1 = require("../backend");
 class PackageKitBackend extends backend_1.default {
-    get prettyName() {
-        return 'PackageKit';
-    }
     get name() {
         return 'packagekit';
+    }
+    get prettyName() {
+        return 'PackageKit';
     }
     get command() {
         return 'pkcon';
