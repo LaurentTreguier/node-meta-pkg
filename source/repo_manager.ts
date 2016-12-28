@@ -1,6 +1,5 @@
 'use strict';
 
-import * as http from 'http';
 import * as request from 'request';
 import Package from './package';
 
@@ -13,9 +12,9 @@ class RepoManager {
 
     getPackage(packageName: string): PromiseLike<Package> {
         return Promise.race(this._repos.map((repo) => new Promise((resolve) => {
-            request(`${repo}/${packageName}.json`, (err, res, body) => {
-                if (!err && res.statusCode / 100 === 2) {
-                    resolve(body);
+            request.get(`${repo}/${packageName}.json`, (err, message, body) => {
+                if (!err && message.statusCode / 100 === 2) {
+                    resolve(JSON.parse(body));
                 }
             });
         })));
