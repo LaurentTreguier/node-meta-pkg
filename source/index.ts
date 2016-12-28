@@ -17,6 +17,7 @@ const backends: Backend<any>[] = [
     new FallbackBackend()
 ].filter((backend) => backend.available);
 
+export { Package };
 export type PackageInfo = string | Package;
 
 export function isInstalled(packageInfo: PackageInfo) {
