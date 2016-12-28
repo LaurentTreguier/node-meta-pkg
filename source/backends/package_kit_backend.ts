@@ -4,7 +4,7 @@ import * as cp from 'child_process';
 import * as rl from 'readline';
 import Backend from '../backend';
 
-class PackageKitBackend extends Backend {
+class PackageKitBackend extends Backend<string[]> {
     get name() {
         return 'packagekit';
     }
@@ -21,7 +21,7 @@ class PackageKitBackend extends Backend {
         return ['freebsd', 'linux'];
     }
 
-    install(packageNames: string[], outputListener: (chunk) => void) {
+    install(packageNames: string[], outputListener: (data: string) => void) {
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);
@@ -39,7 +39,7 @@ class PackageKitBackend extends Backend {
             if (name) {
                 cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
                     .on('exit', resolve)
-                    .stdout.on('data', outputListener);
+                    .stdout.on('data', (data) => outputListener(data.toString()));
             } else {
                 resolve();
             }

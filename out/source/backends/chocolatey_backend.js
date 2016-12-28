@@ -18,7 +18,7 @@ class ChocolateyBackend extends backend_1.default {
         return new Promise((resolve) => {
             cp.spawn('powershell', ['-Command', `Start-Process choco -Verb Runas -ArgumentList 'install --yes ${packageName}' -Wait -WindowStyle Hidden`])
                 .on('exit', resolve)
-                .stdout.on('data', outputListener);
+                .stdout.on('data', (data) => outputListener(data.toString()));
         });
     }
 }

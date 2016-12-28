@@ -12,13 +12,17 @@ const backends = [
 ].filter((backend) => backend.available);
 function isInstalled(packageInfo) {
     return getPackage(packageInfo).then((pkg) => {
-        return pkg.targets.every(util.checkExistence);
+        return pkg.targets.length
+            && pkg.targets.every(util.checkExistence);
     });
 }
 exports.isInstalled = isInstalled;
 ;
 function getInstallers(packageInfo) {
-    return getPackage(packageInfo).then((pkg) => backends.filter((backend) => pkg.backends[backend.name])
+    return getPackage(packageInfo)
+        .then((pkg) => backends
+        .filter((backend) => pkg.backends[backend.name]
+        && backend.packageAvailable(pkg.backends[backend.name]))
         .map((backend) => new Installer(backend, pkg)));
 }
 exports.getInstallers = getInstallers;
@@ -42,12 +46,12 @@ class Installer {
         this._package = pkg;
     }
     install(outputListener) {
-        let packageInstalled = this._package.targets.length
-            && this._package.targets.every(util.checkExistence);
-        return packageInstalled
-            ? Promise.resolve(false)
-            : this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }))
-                .then(() => true);
+        return isInstalled(this._package)
+            .then((installed) => installed
+            ? false
+            : this._backend
+                .install(this._package.backends[this._backend.name], outputListener || (() => { }))
+                .then(() => true));
     }
 }
 exports.Installer = Installer;

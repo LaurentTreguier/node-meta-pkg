@@ -3,7 +3,7 @@
 import * as cp from 'child_process';
 import Backend from '../backend';
 
-class ChocolateyBackend extends Backend {
+class ChocolateyBackend extends Backend<string> {
     get name() {
         return 'chocolatey';
     }
@@ -20,11 +20,11 @@ class ChocolateyBackend extends Backend {
         return ['win32'];
     }
 
-    install(packageName: string, outputListener: (chunk) => void) {
+    install(packageName: string, outputListener: (data: string) => void) {
         return new Promise<void>((resolve) => {
             cp.spawn('powershell', ['-Command', `Start-Process choco -Verb Runas -ArgumentList 'install --yes ${packageName}' -Wait -WindowStyle Hidden`])
                 .on('exit', resolve)
-                .stdout.on('data', outputListener);
+                .stdout.on('data', (data) => outputListener(data.toString()));
         });
     }
 }

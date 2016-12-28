@@ -30,7 +30,7 @@ class PackageKitBackend extends backend_1.default {
             if (name) {
                 cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
                     .on('exit', resolve)
-                    .stdout.on('data', outputListener);
+                    .stdout.on('data', (data) => outputListener(data.toString()));
             }
             else {
                 resolve();

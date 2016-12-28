@@ -9,7 +9,7 @@ import ChocolateyBackend from './backends/chocolatey_backend';
 import * as util from './util';
 
 const repoManager = new RepoManager();
-const backends: Backend[] = [
+const backends: Backend<any>[] = [
     new PackageKitBackend(),
     new BrewBackend(),
     new ChocolateyBackend()
@@ -19,13 +19,17 @@ export type PackageInfo = string | Package;
 
 export function isInstalled(packageInfo: PackageInfo) {
     return getPackage(packageInfo).then((pkg) => {
-        return pkg.targets.every(util.checkExistence);
+        return pkg.targets.length
+            && pkg.targets.every(util.checkExistence);
     });
 };
 
 export function getInstallers(packageInfo: PackageInfo) {
-    return getPackage(packageInfo).then((pkg) => backends.filter((backend) => pkg.backends[backend.name])
-        .map((backend) => new Installer(backend, pkg)));
+    return getPackage(packageInfo)
+        .then((pkg) => backends
+            .filter((backend) => pkg.backends[backend.name]
+                && backend.packageAvailable(pkg.backends[backend.name]))
+            .map((backend) => new Installer(backend, pkg)));
 };
 
 export function addRepo(repo: string) {
@@ -39,25 +43,24 @@ function getPackage(packageInfo: PackageInfo) {
 }
 
 export class Installer {
-    private _backend: Backend;
+    private _backend: Backend<any>;
     private _package: Package;
 
     get name() {
         return this._backend.prettyName;
     }
 
-    constructor(backend: Backend, pkg: any) {
+    constructor(backend: Backend<any>, pkg: any) {
         this._backend = backend;
         this._package = pkg;
     }
 
-    install(outputListener?: (chunk) => void) {
-        let packageInstalled = this._package.targets.length
-            && this._package.targets.every(util.checkExistence);
-
-        return packageInstalled
-            ? Promise.resolve(false)
-            : this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }))
-                .then(() => true);
+    install(outputListener?: (data: string) => void) {
+        return isInstalled(this._package)
+            .then((installed) => installed
+                ? false
+                : this._backend
+                    .install(this._package.backends[this._backend.name], outputListener || (() => { }))
+                    .then(() => true));
     }
 };

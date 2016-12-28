@@ -18,7 +18,7 @@ class BrewBackend extends backend_1.default {
         return new Promise((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)
-                .stdout.on('data', outputListener);
+                .stdout.on('data', (data) => outputListener(data.toString()));
         });
     }
 }
