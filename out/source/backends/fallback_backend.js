@@ -31,11 +31,14 @@ class FallbackBackend extends backend_1.default {
         if (!info) {
             return Promise.resolve(false);
         }
-        let versionData = info.version || packageInfo.version;
-        return Promise.resolve(versionData instanceof Object
-            ? FallbackBackend.retrieveLatestVersion(versionData)
-            : versionData)
-            .then((latestVersion) => new Promise((resolve) => fs.readFile(PACKAGES_DB_PATH, (err, data) => {
+        return FallbackBackend
+            .init()
+            .then(() => {
+            let versionData = info.version || packageInfo.version;
+            return versionData instanceof Object
+                ? FallbackBackend.retrieveLatestVersion(versionData)
+                : versionData;
+        }).then((latestVersion) => new Promise((resolve) => fs.readFile(PACKAGES_DB_PATH, (err, data) => {
             let installedPackages = JSON.parse(data.toString());
             resolve(installedPackages[packageInfo.name].version !== latestVersion);
         })));
