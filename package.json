@@ -27,11 +27,18 @@
   "author": "LaurentTreguier <laurent@treguier.org>",
   "license": "GPL-3.0",
   "dependencies": {
-    "request": "^2.79.0"
+    "decompress": "^4.0.0",
+    "fs-extra": "^1.0.0",
+    "request": "^2.79.0",
+    "sax": "^1.2.1",
+    "tmp": "^0.0.31"
   },
   "devDependencies": {
-    "@types/node": "^6.0.52",
+    "@types/fs-extra": "^0.0.35",
+    "@types/node": "^6.0.53",
     "@types/request": "^0.0.36",
+    "@types/sax": "^0.0.28",
+    "@types/tmp": "^0.0.32",
     "typescript": "^2.1.4"
   }
 }

@@ -3,12 +3,14 @@ const repo_manager_1 = require("./repo_manager");
 const package_kit_backend_1 = require("./backends/package_kit_backend");
 const brew_backend_1 = require("./backends/brew_backend");
 const chocolatey_backend_1 = require("./backends/chocolatey_backend");
+const fallback_backend_1 = require("./backends/fallback_backend");
 const util = require("./util");
 const repoManager = new repo_manager_1.default();
 const backends = [
     new package_kit_backend_1.default(),
     new brew_backend_1.default(),
-    new chocolatey_backend_1.default()
+    new chocolatey_backend_1.default(),
+    new fallback_backend_1.default()
 ].filter((backend) => backend.available);
 function isInstalled(packageInfo) {
     return getPackage(packageInfo).then((pkg) => {
@@ -17,6 +19,13 @@ function isInstalled(packageInfo) {
     });
 }
 exports.isInstalled = isInstalled;
+;
+function isUpgradable(packageInfo) {
+    return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
+        ? fallback_backend_1.default.isUpgradable(pkg.backends.fallback)
+        : false);
+}
+exports.isUpgradable = isUpgradable;
 ;
 function getInstallers(packageInfo) {
     return getPackage(packageInfo)

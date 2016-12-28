@@ -6,13 +6,15 @@ import Backend from './backend';
 import PackageKitBackend from './backends/package_kit_backend';
 import BrewBackend from './backends/brew_backend';
 import ChocolateyBackend from './backends/chocolatey_backend';
+import FallbackBackend from './backends/fallback_backend';
 import * as util from './util';
 
 const repoManager = new RepoManager();
 const backends: Backend<any>[] = [
     new PackageKitBackend(),
     new BrewBackend(),
-    new ChocolateyBackend()
+    new ChocolateyBackend(),
+    new FallbackBackend()
 ].filter((backend) => backend.available);
 
 export type PackageInfo = string | Package;
@@ -22,6 +24,13 @@ export function isInstalled(packageInfo: PackageInfo) {
         return pkg.targets.length
             && pkg.targets.every(util.checkExistence);
     });
+};
+
+export function isUpgradable(packageInfo: PackageInfo) {
+    return getPackage(packageInfo).then((pkg) =>
+        pkg.backends.fallback
+            ? FallbackBackend.isUpgradable(pkg.backends.fallback)
+            : false);
 };
 
 export function getInstallers(packageInfo: PackageInfo) {

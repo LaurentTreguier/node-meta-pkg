@@ -5,7 +5,8 @@ interface Package {
     backends: {
         packagekit?: string[],
         brew?: string,
-        chocolatey?: string
+        chocolatey?: string,
+        fallback?: any
     };
 };
 
