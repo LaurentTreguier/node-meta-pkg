@@ -19,14 +19,12 @@ function isInstalled(packageInfo) {
     });
 }
 exports.isInstalled = isInstalled;
-;
 function isUpgradable(packageInfo) {
     return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
         ? fallback_backend_1.default.isUpgradable(pkg.backends.fallback)
         : false);
 }
 exports.isUpgradable = isUpgradable;
-;
 function getInstallers(packageInfo) {
     return getPackage(packageInfo)
         .then((pkg) => backends
@@ -35,12 +33,14 @@ function getInstallers(packageInfo) {
         .map((backend) => new Installer(backend, pkg)));
 }
 exports.getInstallers = getInstallers;
-;
 function addRepo(repo) {
     repoManager.addRepo(repo);
 }
 exports.addRepo = addRepo;
-;
+function getFallbackBinLocation() {
+    return fallback_backend_1.default.packagesPath;
+}
+exports.getFallbackBinLocation = getFallbackBinLocation;
 function getPackage(packageInfo) {
     return typeof (packageInfo) === 'string'
         ? repoManager.getPackage(packageInfo)
@@ -64,5 +64,4 @@ class Installer {
     }
 }
 exports.Installer = Installer;
-;
 //# sourceMappingURL=index.js.map

@@ -17,7 +17,7 @@ const backends: Backend<any>[] = [
     new FallbackBackend()
 ].filter((backend) => backend.available);
 
-export { Package };
+export { Package }
 export type PackageInfo = string | Package;
 
 export function isInstalled(packageInfo: PackageInfo) {
@@ -25,14 +25,14 @@ export function isInstalled(packageInfo: PackageInfo) {
         return pkg.targets.length
             && pkg.targets.every(util.checkExistence);
     });
-};
+}
 
 export function isUpgradable(packageInfo: PackageInfo) {
     return getPackage(packageInfo).then((pkg) =>
         pkg.backends.fallback
             ? FallbackBackend.isUpgradable(pkg.backends.fallback)
             : false);
-};
+}
 
 export function getInstallers(packageInfo: PackageInfo) {
     return getPackage(packageInfo)
@@ -40,11 +40,15 @@ export function getInstallers(packageInfo: PackageInfo) {
             .filter((backend) => pkg.backends[backend.name]
                 && backend.packageAvailable(pkg.backends[backend.name]))
             .map((backend) => new Installer(backend, pkg)));
-};
+}
 
 export function addRepo(repo: string) {
     repoManager.addRepo(repo);
-};
+}
+
+export function getFallbackBinLocation() {
+    return FallbackBackend.packagesPath;
+}
 
 function getPackage(packageInfo: PackageInfo) {
     return typeof (packageInfo) === 'string'
@@ -73,4 +77,4 @@ export class Installer {
                     .install(this._package.backends[this._backend.name], outputListener || (() => { }))
                     .then(() => true));
     }
-};
+}

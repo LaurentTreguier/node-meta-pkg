@@ -76,17 +76,20 @@ This guide uses Typescript notations for types.
 ### `type PackageInfo = string | Package`
 Represents a package either by its name if it is available in a repository, or by a raw package instance.
 
-### `function isInstalled(packageInfo: PackageInfo)`
+### `function isInstalled(packageInfo: PackageInfo): PromiseLike<boolean>`
 Returns a `Promise` resolving `true` if the package is already installed and `false` otherwise.
 
-### `function isUpgradable(packageInfo: PackageInfo)`
+### `function isUpgradable(packageInfo: PackageInfo): PromiseLike<boolean>`
 Returns a `Promise` resolving `true` if the package can be upgraded and `false` otherwise. Only packages installed with the fallback method will be considered
 
-### `function getInstallers(packageInfo: PackageInfo): Installer[]`
+### `function getInstallers(packageInfo: PackageInfo): : PromiseLike<Installer[]>`
 Returns a `Promise` resolving an array of installers for the package represented by `packageInfo`.
 
 ### `function addRepo(url: string): void`
 Adds a repository to fetch packages. Repositories are simple URLs that can provide packages when concatenating it with [packageName].json. `http://www.example.com/repo` is a valid repository URL if `http//www.example.com/repo/foobar.json` provides a package JSON.
+
+### `function getFallbackBinLocation: string`
+Returns the directory where binaries are linked when packages are installed through the fallback backend.
 
 ### `interface Package`
 Members:
