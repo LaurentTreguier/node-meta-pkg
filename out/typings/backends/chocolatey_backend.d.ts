@@ -1,9 +1,9 @@
 import Backend from '../backend';
-declare class ChocolateyBackend extends Backend {
+declare class ChocolateyBackend extends Backend<string> {
     readonly name: string;
     readonly prettyName: string;
     readonly command: string;
     readonly platforms: string[];
-    install(packageName: string, outputListener: (chunk) => void): Promise<void>;
+    install(packageName: string, outputListener: (data: string) => void): Promise<void>;
 }
 export default ChocolateyBackend;

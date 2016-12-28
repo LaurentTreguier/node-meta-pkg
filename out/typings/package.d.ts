@@ -4,6 +4,7 @@ interface Package {
         packagekit?: string[];
         brew?: string;
         chocolatey?: string;
+        fallback?: any;
     };
 }
 export default Package;
