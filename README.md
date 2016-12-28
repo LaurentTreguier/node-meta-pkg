@@ -1,22 +1,13 @@
-<style>
-.yes {
-    color: green;
-}
-.partial {
-    color: yellow;
-}
-</style>
-
 # MetaPkg
 
 MetaPkg is a simple node module that can install software using already existing means such as package managers or using local installations.
 
-|OS     |PackageKit                |Native installer|Homebrew/Linuxbrew        |Chocolatey                        |Fallback                  |
-|-------|--------------------------|----------------|--------------------------|----------------------------------|--------------------------|
-|Windows|                          |planned         |                          |<div class="partial">partial</div>|<div class="yes">yes</div>|
-|macOS  |                          |planned         |<div class="yes">yes</div>|                                  |<div class="yes">yes</div>|
-|Linux  |<div class="yes">yes</div>|                |<div class="yes">yes</div>|                                  |<div class="yes">yes</div>|
-|FreeBSD|<div class="yes">yes</div>|                |                          |                                  |<div class="yes">yes</div>|
+|OS     |PackageKit|Native installer|Homebrew/Linuxbrew|Chocolatey|Fallback|
+|-------|----------|----------------|------------------|----------|--------|
+|Windows|          |planned         |                  |partial   |yes     |
+|macOS  |          |planned         |yes               |          |yes     |
+|Linux  |yes       |                |yes               |          |yes     |
+|FreeBSD|yes       |                |                  |          |yes     |
 
 ## The structure of a package
 
@@ -24,7 +15,7 @@ Packages are simple JSON files. Two mains fields are required: `targets` and `ba
 - `targets`: an array of filenames or executable commands that the package provides. If the `targets` are already present on the system when trying to install the package, then it will be considered already installed and meta-pkg will skip its installation.
 - `backends`: an object containing the information for different backends. Nothing is necesary here. A package could be available only for macOS via a .pkg installer ; and another one for Windows via the fallback method, and on Linux and FreeBSD via PackageKit. Theorically a package could have no backend at all (though it would be stupid).
 
-```json
+```js
 {
     "targets": ["foobar"],
     "backends": {
