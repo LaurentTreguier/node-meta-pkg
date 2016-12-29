@@ -116,7 +116,9 @@ class FallbackBackend extends backend_1.default {
             let parser = sax.parser(false, null);
             return new Promise((resolve) => {
                 parser.ontext = (text) => {
-                    let match = text.match(version.regexp);
+                    let match = text.match(version.regexp instanceof RegExp
+                        ? version.regexp
+                        : new RegExp(version.regexp));
                     if (match) {
                         resolve(match[1]);
                     }

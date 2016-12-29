@@ -32,7 +32,7 @@ interface Info {
 
 interface FeedVersion {
     feed: string;
-    regexp: RegExp;
+    regexp: string | RegExp;
 }
 
 class FallbackBackend extends Backend<any> {
@@ -158,7 +158,9 @@ class FallbackBackend extends Backend<any> {
 
             return new Promise((resolve) => {
                 parser.ontext = (text) => {
-                    let match = text.match(version.regexp);
+                    let match = text.match(version.regexp instanceof RegExp
+                        ? version.regexp
+                        : new RegExp(version.regexp));
 
                     if (match) {
                         resolve(match[1]);
