@@ -8,7 +8,7 @@ export function checkExistence(command: string) {
     let exists = false;
 
     process.env.PATH.split(isWin ? ';' : ':').forEach((dir) => {
-        for (let extension of ['', '.exe', '.bat', '.cmd']) {
+        for (let extension of [''].concat(isWin ? ['.exe', '.bat', '.cmd'] : [])) {
             try {
                 fs.accessSync(path.join(dir, command + extension), fs.constants.F_OK);
                 exists = true;
