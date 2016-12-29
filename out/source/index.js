@@ -55,12 +55,12 @@ class Installer {
         this._package = pkg;
     }
     install(outputListener) {
+        let alreadyInstalled;
         return isInstalled(this._package)
-            .then((installed) => installed
-            ? false
-            : this._backend
-                .install(this._package.backends[this._backend.name], outputListener || (() => { }))
-                .then(() => true));
+            .then((installed) => {
+            alreadyInstalled = installed;
+            return this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }));
+        }).then(() => alreadyInstalled);
     }
 }
 exports.Installer = Installer;

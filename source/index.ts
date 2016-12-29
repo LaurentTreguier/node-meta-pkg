@@ -70,11 +70,11 @@ export class Installer {
     }
 
     install(outputListener?: (data: string) => void) {
+        let alreadyInstalled: boolean;
         return isInstalled(this._package)
-            .then((installed) => installed
-                ? false
-                : this._backend
-                    .install(this._package.backends[this._backend.name], outputListener || (() => { }))
-                    .then(() => true));
+            .then((installed) => {
+                alreadyInstalled = installed;
+                return this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }));
+            }).then(() => alreadyInstalled);
     }
 }
