@@ -15,7 +15,8 @@ class PackageKitBackend extends backend_1.default {
     get platforms() {
         return ['freebsd', 'linux'];
     }
-    install(packageNames, outputListener) {
+    install(packageInfo, outputListener) {
+        let packageNames = packageInfo instanceof Array ? packageInfo : [packageInfo];
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);
