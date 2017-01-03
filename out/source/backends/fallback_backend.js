@@ -87,7 +87,7 @@ class FallbackBackend extends backend_1.default {
                 .on('close', resolve.bind(null, p));
         })).then((p) => {
             outputListener('Decompressing package...\n');
-            return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name));
+            return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), { strip: info.strip || 0 });
         }).then(() => {
             if (!info.bin) {
                 return;

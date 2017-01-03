@@ -26,8 +26,9 @@ const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 
 interface Info {
     source: string;
-    version: string | FeedVersion;
+    version?: string | FeedVersion;
     bin?: string | string[];
+    strip?: number;
 }
 
 interface FeedVersion {
@@ -118,7 +119,7 @@ class FallbackBackend extends Backend<any> {
                     .on('close', resolve.bind(null, p));
             })).then((p: string) => {
                 outputListener('Decompressing package...\n');
-                return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name));
+                return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), { strip: info.strip || 0 });
             }).then(() => {
                 if (!info.bin) {
                     return;
