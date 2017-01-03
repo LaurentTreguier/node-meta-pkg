@@ -9,6 +9,9 @@ import * as tmp from 'tmp';
 import Backend from '../backend';
 let decompress = require('decompress');
 
+let decompressPlugins = ['unzip', 'tar', 'tarbz2', 'targz', 'tarxz']
+    .map((type) => require('decompress-' + type)());
+
 const DATA_DIR = {
     darwin: 'Library/Application Support',
     win32: 'AppData/Roaming',
@@ -110,8 +113,7 @@ class FallbackBackend extends Backend<any> {
                 outputListener(`Installing ${packageInfo.name} at version ${ver}\n`);
                 packageUrl = info.source.replace(/%VERSION%/g, ver);
                 version = ver;
-            }).then(() => new Promise((resolve) =>
-                tmp.file((err, p, fd, cleanup) => resolve(p))))
+            }).then(() => new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p))))
             .then((p: string) => new Promise((resolve) => {
                 outputListener('Downloading package...\n');
                 request.get(packageUrl)
@@ -119,7 +121,11 @@ class FallbackBackend extends Backend<any> {
                     .on('close', resolve.bind(null, p));
             })).then((p: string) => {
                 outputListener('Decompressing package...\n');
-                return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), { strip: info.strip || 0 });
+                return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name),
+                    {
+                        plugins: decompressPlugins,
+                        strip: info.strip || 0
+                    });
             }).then(() => {
                 if (!info.bin) {
                     return;

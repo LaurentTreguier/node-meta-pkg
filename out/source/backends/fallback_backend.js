@@ -7,6 +7,8 @@ const sax = require("sax");
 const tmp = require("tmp");
 const backend_1 = require("../backend");
 let decompress = require('decompress');
+let decompressPlugins = ['unzip', 'tar', 'tarbz2', 'targz', 'tarxz']
+    .map((type) => require('decompress-' + type)());
 const DATA_DIR = {
     darwin: 'Library/Application Support',
     win32: 'AppData/Roaming',
@@ -87,7 +89,10 @@ class FallbackBackend extends backend_1.default {
                 .on('close', resolve.bind(null, p));
         })).then((p) => {
             outputListener('Decompressing package...\n');
-            return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), { strip: info.strip || 0 });
+            return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), {
+                plugins: decompressPlugins,
+                strip: info.strip || 0
+            });
         }).then(() => {
             if (!info.bin) {
                 return;
