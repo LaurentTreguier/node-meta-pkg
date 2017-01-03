@@ -1,6 +1,6 @@
 {
   "name": "meta-pkg",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A way to install software natively in a cross-platform manner.",
   "keywords": [
     "install",
