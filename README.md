@@ -57,7 +57,8 @@ Packages are simple JSONs. Two mains fields are required: `targets` and `backend
     - `regexp` (`string | RegExp`): the regular expression that will be used to detect the version in the feed. The first parenthesis group will be the version number. It can be a `RegExp` object or a `string` for JSON compatibility.
     - `[OS identifier]` (`any`): the information needed for the specific OS to install the software.
       - `source` (`string`): the URL to get the software from. If needed, `%VERSION%` will be replaced by the version.
-      - `bin` (`string | string[]`): either a string or an array of names for the software's binaries. These will be linked in a single directory that contains binaries from everything that was installed this way.
+      - `strip` (`number`, optional): the number of leading directories to strip from the downloaded archive when decompressing it.
+      - `bin` (`string | string[]`, optional): either a string or an array of names for the software's binaries. These will be linked in a single directory that contains binaries from everything that was installed this way.
       - `version` (optional): same as the above `version`, but can override it for a specific OS.
 - `installer`: not yet implemented.
 
