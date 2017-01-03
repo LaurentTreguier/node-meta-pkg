@@ -8,7 +8,7 @@ declare class FallbackBackend extends Backend<any> {
     readonly prettyName: string;
     readonly command: any;
     readonly platforms: string[];
-    packageAvailable(packageInfo: any): boolean;
+    packageAvailable(packageInfo: any): Promise<boolean>;
     install(packageInfo: any, outputListener: (data: string) => void): Promise<any>;
     private static retrieveLatestVersion(version, outputListener?);
 }

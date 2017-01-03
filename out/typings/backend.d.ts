@@ -5,6 +5,6 @@ declare abstract class Backend<T> {
     readonly abstract platforms: string[];
     abstract install(packageInfo: T, outputListener: (data: string) => void): PromiseLike<void>;
     readonly available: boolean;
-    packageAvailable(packageInfo: T): boolean;
+    packageAvailable(packageInfo: T): Promise<boolean>;
 }
 export default Backend;

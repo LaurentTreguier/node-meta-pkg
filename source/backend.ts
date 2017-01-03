@@ -16,7 +16,7 @@ abstract class Backend<T> {
     }
 
     packageAvailable(packageInfo: T) {
-        return true;
+        return Promise.resolve(true);
     }
 }
 

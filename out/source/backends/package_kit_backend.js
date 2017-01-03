@@ -15,28 +15,34 @@ class PackageKitBackend extends backend_1.default {
     get platforms() {
         return ['freebsd', 'linux'];
     }
+    packageAvailable(packageInfo) {
+        return this.resolvePackageName(packageInfo)
+            .then((name) => !!name);
+    }
     install(packageInfo, outputListener) {
+        return this.resolvePackageName(packageInfo)
+            .then((name) => new Promise((resolve) => name
+            ? cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
+                .on('exit', resolve)
+                .stdout.on('data', (data) => outputListener(data.toString()))
+            : resolve())).then(() => undefined);
+    }
+    resolvePackageName(packageInfo) {
         let packageNames = packageInfo instanceof Array ? packageInfo : [packageInfo];
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);
+            let readingData = false;
             reader.on('line', (line) => {
-                if (line.indexOf('Available') !== -1) {
+                if (line.indexOf('Results') !== -1) {
+                    readingData = true;
+                }
+                else if (readingData) {
                     resolve(packageName);
                 }
             });
             reader.on('close', resolve.bind(null, ''));
-        }))).then((names) => new Promise((resolve) => {
-            let name = names.find((name) => name.length > 0);
-            if (name) {
-                cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
-                    .on('exit', resolve)
-                    .stdout.on('data', (data) => outputListener(data.toString()));
-            }
-            else {
-                resolve();
-            }
-        })).then(() => undefined);
+        }))).then((names) => names.find((name) => name.length > 0));
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });

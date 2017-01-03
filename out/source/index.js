@@ -26,11 +26,15 @@ function isUpgradable(packageInfo) {
 }
 exports.isUpgradable = isUpgradable;
 function getInstallers(packageInfo) {
+    let availableBackends;
+    let resolvedPackage;
     return getPackage(packageInfo)
-        .then((pkg) => backends
-        .filter((backend) => pkg.backends[backend.name]
-        && backend.packageAvailable(pkg.backends[backend.name]))
-        .map((backend) => new Installer(backend, pkg)));
+        .then((pkg) => {
+        availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
+        resolvedPackage = pkg;
+    }).then(() => Promise.all(availableBackends.map((backend) => backend.packageAvailable(resolvedPackage.backends[backend.name]))))
+        .then((results) => availableBackends.filter((backend, i) => results[i]))
+        .then((actuallyAvailableBackends) => actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
 }
 exports.getInstallers = getInstallers;
 function addRepo(repo) {

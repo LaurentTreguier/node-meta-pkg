@@ -35,11 +35,16 @@ export function isUpgradable(packageInfo: PackageInfo) {
 }
 
 export function getInstallers(packageInfo: PackageInfo) {
+    let availableBackends: Backend<any>[];
+    let resolvedPackage: Package;
     return getPackage(packageInfo)
-        .then((pkg) => backends
-            .filter((backend) => pkg.backends[backend.name]
-                && backend.packageAvailable(pkg.backends[backend.name]))
-            .map((backend) => new Installer(backend, pkg)));
+        .then((pkg) => {
+            availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
+            resolvedPackage = pkg;
+        }).then(() => Promise.all(availableBackends.map((backend) =>
+            backend.packageAvailable(resolvedPackage.backends[backend.name]))))
+        .then((results) => availableBackends.filter((backend, i) => results[i]))
+        .then((actuallyAvailableBackends) => actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
 }
 
 export function addRepo(repo: string) {
@@ -74,7 +79,8 @@ export class Installer {
         return isInstalled(this._package)
             .then((installed) => {
                 alreadyInstalled = installed;
-                return this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }));
+                return this._backend.install(this._package.backends[this._backend.name],
+                    outputListener || (() => { }));
             }).then(() => alreadyInstalled);
     }
 }

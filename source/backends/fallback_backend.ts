@@ -89,7 +89,7 @@ class FallbackBackend extends Backend<any> {
     }
 
     packageAvailable(packageInfo: any) {
-        return !!packageInfo[process.platform];
+        return Promise.resolve(!!packageInfo[process.platform]);
     }
 
     install(packageInfo: any, outputListener: (data: string) => void) {

@@ -1,9 +1,12 @@
 import Backend from '../backend';
-declare class PackageKitBackend extends Backend<string | string[]> {
+export declare type PackageInfo = string | string[];
+declare class PackageKitBackend extends Backend<PackageInfo> {
     readonly name: string;
     readonly prettyName: string;
     readonly command: string;
     readonly platforms: string[];
-    install(packageInfo: string | string[], outputListener: (data: string) => void): Promise<any>;
+    packageAvailable(packageInfo: PackageInfo): Promise<boolean>;
+    install(packageInfo: PackageInfo, outputListener: (data: string) => void): Promise<any>;
+    private resolvePackageName(packageInfo);
 }
 export default PackageKitBackend;
