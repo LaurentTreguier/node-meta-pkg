@@ -85,10 +85,12 @@ class FallbackBackend extends backend_1.default {
                 .on('close', resolve.bind(null, p));
         })).then((p) => {
             outputListener('Decompressing package...\n');
-            return decompress(p, path.join(PACKAGES_DIR_PATH, packageInfo.name), {
+            let packagePath = path.join(PACKAGES_DIR_PATH, packageInfo.name);
+            return new Promise((resolve) => fs.remove(packagePath, resolve))
+                .then(decompress.bind(null, p, packagePath, {
                 plugins: decompressPlugins,
                 strip: info.strip || 0
-            });
+            }));
         }).then(() => {
             if (!info.bin) {
                 return;
@@ -115,16 +117,19 @@ class FallbackBackend extends backend_1.default {
         }).then((feed) => {
             let parser = sax.parser(false, null);
             return new Promise((resolve) => {
+                let matches = [];
                 parser.ontext = (text) => {
                     let match = text.match(version.regexp instanceof RegExp
                         ? version.regexp
                         : new RegExp(version.regexp));
                     if (match) {
-                        resolve(match[1]);
+                        matches.push(match[1]);
                     }
                 };
-                parser.onend = resolve;
-                parser.write(feed);
+                parser.onend = () => {
+                    resolve(matches.reduce((previous, current) => previous > current ? previous : current));
+                };
+                parser.write(feed).end();
             });
         });
     }
