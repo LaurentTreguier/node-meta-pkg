@@ -51,7 +51,7 @@ export function addRepo(repo: string) {
     repoManager.addRepo(repo);
 }
 
-export function getFallbackBinLocation() {
+export function getFallbackPackagesPath() {
     return FallbackBackend.packagesPath;
 }
 

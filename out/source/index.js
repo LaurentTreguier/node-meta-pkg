@@ -41,10 +41,10 @@ function addRepo(repo) {
     repoManager.addRepo(repo);
 }
 exports.addRepo = addRepo;
-function getFallbackBinLocation() {
+function getFallbackPackagesPath() {
     return fallback_backend_1.default.packagesPath;
 }
-exports.getFallbackBinLocation = getFallbackBinLocation;
+exports.getFallbackPackagesPath = getFallbackPackagesPath;
 function getPackage(packageInfo) {
     return typeof (packageInfo) === 'string'
         ? repoManager.getPackage(packageInfo)
