@@ -50,16 +50,18 @@ Packages are simple JSONs. Two mains fields are required: `targets` and `backend
 - `packagekit` (`string | string[]`): this backend leverages PackageKit to install software on Linux and FreeBSD smoothly in a cross-distro manner. However, as package names can still be different between distros, an array of different possible package names can be specifie when necessary.
 - `brew` (`string`): uses Homebrew on macOS and Linuxbrew on Linux. Here only a single package name is required as brew packages don't depend on the distro.
 - `chocolatey` (`string`): uses Chocolatey to install software on Windows. Just like for `brew`, only a single package name is required.
-- `fallback` (`any`): downloads an archive and installs it locally. Binary files can be specified and will be linked in a directory which is automatically added to the `PATH` environment variable. After installing a package locally, these binaries can be used with the `child_process` module and such without worrying about their location.
+- `fallback` (`any`): downloads an archive and installs it locally. Binary files directories can be specified and will be automatically added to the `PATH` environment variable. After installing a package locally, these binaries can be used with the `child_process` module and such without worrying about their location.
   - `name` (`string`): the name that the local installation will use.
   - `version` (`string | any`, optional): the version of the software. It can be a fixed version number, but it can also be deduced from an RSS feed. This approach is generally better as packages can thus be versions-independant and won't need to be updated to follow the software's version.
     - `feed` (`string`): the URL of the feed. Tip: github generates feeds when adding '.atom' to some URLs (e.g. https://github.com/LaurentTreguier/node-meta-pkg/releases.atom).
     - `regexp` (`string | RegExp`): the regular expression that will be used to detect the version in the feed. The first parenthesis group will be the version number. It can be a `RegExp` object or a `string` for JSON compatibility.
-    - `[OS identifier]` (`any`): the information needed for the specific OS to install the software.
-      - `source` (`string`): the URL to get the software from. If needed, `%VERSION%` will be replaced by the version.
-      - `strip` (`number`, optional): the number of leading directories to strip from the downloaded archive when decompressing it.
-      - `bin` (`string | string[]`, optional): either a string or an array of names for the software's binaries. These will be linked in a single directory that contains binaries from everything that was installed this way.
-      - `version` (optional): same as the above `version`, but can override it for a specific OS.
+  - `strip` (`number`, optional): the number of leading directories to strip from the downloaded archive when decompressing it.
+  - `bin` (`string | string[]`, optional): either a string or an array of names for the software's binaries directories. These will be added to the `PATH` environment variable automatically.
+  - `darwin | freebsd | linux | win32` (`string | any`): the information needed for the specific OS to install the software. It can either be a source URL, or an object containing a source URL and potentially overriding `version`, `bin` or `strip` for the specific OS.
+    - `source` (`string`): the URL to get the software from. If needed, `%VERSION%` will be replaced by the version.
+    - `version` (optional): same as the above `version`, but can override it for a specific OS.
+    - `bin` (optional): same as the above `bin`, but can override it for a specific OS.
+    - `strip` (optional): same as the above `strip`, but can override it for a specific OS.
 - `installer`: not yet implemented.
 
 ## API
@@ -80,8 +82,8 @@ Returns a `Promise` resolving an array of installers for the package represented
 ### `function addRepo(url: string): void`
 Adds a repository to fetch packages. Repositories are simple URLs that can provide packages when concatenating it with [packageName].json. `http://www.example.com/repo` is a valid repository URL if `http//www.example.com/repo/foobar.json` provides a package JSON.
 
-### `function getFallbackBinLocation: string`
-Returns the directory where binaries are linked when packages are installed through the fallback backend.
+### `function getFallbackPackagesPath: string`
+Returns the directory where packages are installed when using the fallback backend.
 
 ### `interface Package`
 Members:
