@@ -11,5 +11,6 @@ declare class FallbackBackend extends Backend<any> {
     packageAvailable(packageInfo: any): Promise<boolean>;
     install(packageInfo: any, outputListener: (data: string) => void): Promise<any>;
     private static retrieveLatestVersion(version, outputListener?);
+    private static completePath();
 }
 export default FallbackBackend;

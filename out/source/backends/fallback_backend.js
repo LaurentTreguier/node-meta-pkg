@@ -16,14 +16,11 @@ const DATA_DIR = {
 };
 const PACKAGES_DIR = 'MetaPkg';
 const PACKAGES_DIR_PATH = path.join(os.homedir(), DATA_DIR[process.platform] || DATA_DIR.default, PACKAGES_DIR);
-const PACKAGES_BIN = '.bin';
-const PACKAGES_BIN_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_BIN);
 const PACKAGES_DB = 'packages.json';
 const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 class FallbackBackend extends backend_1.default {
     static init() {
-        return new Promise((resolve) => fs.ensureFile(PACKAGES_DB_PATH, resolve))
-            .then(() => new Promise((resolve) => fs.ensureDir(PACKAGES_BIN_PATH, resolve)));
+        return new Promise((resolve) => fs.ensureFile(PACKAGES_DB_PATH, resolve));
     }
     static get packagesPath() {
         return PACKAGES_DIR_PATH;
@@ -40,15 +37,14 @@ class FallbackBackend extends backend_1.default {
             return versionData instanceof Object
                 ? FallbackBackend.retrieveLatestVersion(versionData)
                 : versionData;
-        }).then((latestVersion) => new Promise((resolve) => fs.readFile(PACKAGES_DB_PATH, (err, data) => {
-            let installedPackages = JSON.parse(data.toString());
+        }).then((latestVersion) => new Promise((resolve) => fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
+            let installedPackages = jsonObject || {};
             resolve(installedPackages[packageInfo.name].version !== latestVersion);
         })));
     }
     constructor() {
         super();
-        let sep = (process.platform === 'win32' ? ';' : ':');
-        process.env.PATH += sep + PACKAGES_BIN_PATH;
+        FallbackBackend.completePath();
     }
     get name() {
         return 'fallback';
@@ -69,7 +65,7 @@ class FallbackBackend extends backend_1.default {
         let info = packageInfo[process.platform];
         let packageUrl;
         let version;
-        let binaries;
+        let binaries = [];
         return FallbackBackend
             .init()
             .then(() => {
@@ -97,16 +93,15 @@ class FallbackBackend extends backend_1.default {
             if (!info.bin) {
                 return;
             }
-            outputListener('Linking binaries...\n');
             binaries = info.bin instanceof Array ? info.bin : [info.bin];
-            return Promise.all(binaries.map((bin) => new Promise((resolve) => fs.link(path.join(PACKAGES_DIR_PATH, packageInfo.name, bin), path.join(PACKAGES_BIN_PATH, bin), resolve))));
+            FallbackBackend.completePath();
         }).then(() => new Promise((resolve) => {
             outputListener('Registering package...\n');
-            fs.readFile(PACKAGES_DB_PATH, (err, data) => resolve(data.length ? JSON.parse(data.toString()) : {}));
+            fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => resolve(jsonObject || {}));
         })).then((installedPackages) => {
             installedPackages[packageInfo.name] = {
                 version: version,
-                bin: binaries
+                bin: binaries.map((bin) => path.basename(bin))
             };
             return new Promise((resolve) => fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
         }).then(() => outputListener('Package installed\n'));
@@ -132,6 +127,20 @@ class FallbackBackend extends backend_1.default {
                 parser.write(feed);
             });
         });
+    }
+    static completePath() {
+        let sep = (process.platform === 'win32' ? ';' : ':');
+        let packages = fs.readJSONSync(PACKAGES_DB_PATH);
+        for (let name in packages) {
+            if (packages[name].bin) {
+                packages[name].bin.forEach((bin) => {
+                    let binPath = path.join(PACKAGES_DIR_PATH, name, bin);
+                    if (process.env.PATH.indexOf(binPath) === -1) {
+                        process.env.PATH += sep + binPath;
+                    }
+                });
+            }
+        }
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
