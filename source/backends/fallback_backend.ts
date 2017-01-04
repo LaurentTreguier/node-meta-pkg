@@ -25,14 +25,14 @@ const PACKAGES_DIR_PATH = path.join(os.homedir(),
 const PACKAGES_DB = 'packages.json';
 const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 
-interface Info {
-    source: string;
+abstract class Info {
+    source?: string;
     version?: string | FeedVersion;
     bin?: string | string[];
     strip?: number;
 }
 
-interface FeedVersion {
+abstract class FeedVersion {
     feed: string;
     regexp: string | RegExp;
 }
@@ -47,18 +47,14 @@ class FallbackBackend extends Backend<any> {
     }
 
     static isUpgradable(packageInfo: any) {
-        let info: Info = packageInfo[process.platform];
-
-        if (!info) {
-            return Promise.resolve(false);
-        }
+        let info = FallbackBackend.getInfo(packageInfo);
 
         return FallbackBackend
             .init()
             .then(() => {
-                let versionData = info.version || packageInfo.version
-                return versionData instanceof Object
-                    ? FallbackBackend.retrieveLatestVersion(<FeedVersion>versionData)
+                let versionData = info.version
+                return versionData instanceof FeedVersion
+                    ? FallbackBackend.retrieveLatestVersion(versionData)
                     : versionData;
             }).then((latestVersion) => new Promise((resolve) =>
                 fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
@@ -67,83 +63,33 @@ class FallbackBackend extends Backend<any> {
                 })));
     }
 
-    constructor() {
-        super();
-        FallbackBackend.completePath();
+    private static completePath() {
+        let sep = (process.platform === 'win32' ? ';' : ':');
+        let packages = fs.readJSONSync(PACKAGES_DB_PATH);
+
+        for (let name in packages) {
+            if (packages[name].bin) {
+                packages[name].bin.forEach((bin) => {
+                    let binPath = path.join(PACKAGES_DIR_PATH, name, bin);
+
+                    if (process.env.PATH.indexOf(binPath) === -1) {
+                        process.env.PATH += sep + binPath;
+                    }
+                });
+            }
+        }
     }
 
-    get name() {
-        return 'fallback';
-    }
+    private static getInfo(packageInfo: any) {
+        let platformInfo: string | Info = packageInfo[process.platform];
+        let info: Info = platformInfo instanceof Info ? platformInfo : { source: platformInfo };
 
-    get prettyName() {
-        return 'Local install';
-    }
+        info.source = info.source || packageInfo.source;
+        info.version = info.version || packageInfo.version;
+        info.bin = info.bin || packageInfo.bin;
+        info.strip = info.strip || packageInfo.strip;
 
-    get command() {
-        return null;
-    }
-
-    get platforms() {
-        return ['darwin', 'freebsd', 'linux', 'win32'];
-    }
-
-    packageAvailable(packageInfo: any) {
-        return Promise.resolve(!!packageInfo[process.platform]);
-    }
-
-    install(packageInfo: any, outputListener: (data: string) => void) {
-        let info: Info = packageInfo[process.platform];
-        let packageUrl: string;
-        let version: string;
-        let binaries: string[] = [];
-
-        return FallbackBackend
-            .init()
-            .then(() => {
-                let versionData = info.version || packageInfo.version
-                return versionData instanceof Object
-                    ? FallbackBackend.retrieveLatestVersion(<FeedVersion>versionData, outputListener)
-                    : versionData;
-            }).then((ver: string) => {
-                outputListener(`Installing ${packageInfo.name} at version ${ver}\n`);
-                packageUrl = info.source.replace(/%VERSION%/g, ver);
-                version = ver;
-            }).then(() => new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p))))
-            .then((p: string) => new Promise((resolve) => {
-                outputListener('Downloading package...\n');
-                request.get(packageUrl)
-                    .pipe(fs.createWriteStream(p))
-                    .on('close', resolve.bind(null, p));
-            })).then((p: string) => {
-                outputListener('Decompressing package...\n');
-                let packagePath = path.join(PACKAGES_DIR_PATH, packageInfo.name);
-                return new Promise((resolve) => fs.remove(packagePath, resolve))
-                    .then(decompress.bind(null, p, packagePath,
-                        {
-                            plugins: decompressPlugins,
-                            strip: info.strip || 0
-                        }));
-            }).then(() => {
-                if (!info.bin) {
-                    return;
-                }
-
-                binaries = info.bin instanceof Array ? info.bin : [info.bin];
-                FallbackBackend.completePath();
-            }).then(() => new Promise((resolve) => {
-                outputListener('Registering package...\n');
-                fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) =>
-                    resolve(jsonObject || {}));
-            })).then((installedPackages) => {
-                installedPackages[packageInfo.name] = {
-                    version: version,
-                    bin: binaries.map((bin) => path.basename(bin))
-                };
-
-                return new Promise((resolve) =>
-                    fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
-            }).then(() => outputListener('Package installed\n'));
+        return info;
     }
 
     private static retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void) {
@@ -180,21 +126,84 @@ class FallbackBackend extends Backend<any> {
         });
     }
 
-    private static completePath() {
-        let sep = (process.platform === 'win32' ? ';' : ':');
-        let packages = fs.readJSONSync(PACKAGES_DB_PATH);
+    constructor() {
+        super();
+        FallbackBackend.completePath();
+    }
 
-        for (let name in packages) {
-            if (packages[name].bin) {
-                packages[name].bin.forEach((bin) => {
-                    let binPath = path.join(PACKAGES_DIR_PATH, name, bin);
+    get name() {
+        return 'fallback';
+    }
 
-                    if (process.env.PATH.indexOf(binPath) === -1) {
-                        process.env.PATH += sep + binPath;
-                    }
-                });
-            }
-        }
+    get prettyName() {
+        return 'Local install';
+    }
+
+    get command() {
+        return null;
+    }
+
+    get platforms() {
+        return ['darwin', 'freebsd', 'linux', 'win32'];
+    }
+
+    packageAvailable(packageInfo: any) {
+        return Promise.resolve(!!packageInfo[process.platform]);
+    }
+
+    install(packageInfo: any, outputListener: (data: string) => void) {
+        let info: Info = FallbackBackend.getInfo(packageInfo);
+        let packageUrl: string;
+        let version: string;
+        let binaries: string[] = [];
+
+        return FallbackBackend
+            .init()
+            .then(() => {
+                let versionData = info.version
+                return versionData instanceof Object
+                    ? FallbackBackend.retrieveLatestVersion(<FeedVersion>versionData, outputListener)
+                    : versionData;
+            }).then((ver: string) => {
+                outputListener(`Installing ${packageInfo.name} at version ${ver}\n`);
+                packageUrl = info.source.replace(/%VERSION%/g, ver);
+                version = ver;
+            }).then(() => new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p))))
+            .then((p: string) => new Promise((resolve) => {
+                outputListener('Downloading package...\n');
+                request.get(packageUrl)
+                    .pipe(fs.createWriteStream(p))
+                    .on('close', resolve.bind(null, p));
+            })).then((p: string) => {
+                outputListener('Decompressing package...\n');
+                let packagePath = path.join(PACKAGES_DIR_PATH, packageInfo.name);
+                return new Promise((resolve) => fs.remove(packagePath, resolve))
+                    .then(decompress.bind(null, p, packagePath,
+                        {
+                            plugins: decompressPlugins,
+                            strip: info.strip || 0
+                        }));
+            }).then(() => {
+                let bin = info.bin;
+                if (!info.bin) {
+                    return;
+                }
+
+                binaries = info.bin instanceof Array ? info.bin : [info.bin];
+                FallbackBackend.completePath();
+            }).then(() => new Promise((resolve) => {
+                outputListener('Registering package...\n');
+                fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) =>
+                    resolve(jsonObject || {}));
+            })).then((installedPackages) => {
+                installedPackages[packageInfo.name] = {
+                    version: version,
+                    bin: binaries.map((bin) => path.basename(bin))
+                };
+
+                return new Promise((resolve) =>
+                    fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
+            }).then(() => outputListener('Package installed\n'));
     }
 }
 
