@@ -38,15 +38,15 @@ abstract class FeedVersion {
 }
 
 class FallbackBackend extends Backend<any> {
-    static init() {
+    static init(): PromiseLike<any> {
         return new Promise((resolve) => fs.ensureFile(PACKAGES_DB_PATH, resolve));
     }
 
-    static get packagesPath() {
+    static get packagesPath(): string {
         return PACKAGES_DIR_PATH;
     }
 
-    static isUpgradable(packageInfo: any) {
+    static isUpgradable(packageInfo: any): PromiseLike<boolean> {
         let info = FallbackBackend.getInfo(packageInfo);
 
         return FallbackBackend
