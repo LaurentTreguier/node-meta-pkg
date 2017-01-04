@@ -108,7 +108,8 @@ class FallbackBackend extends backend_1.default {
         return ['darwin', 'freebsd', 'linux', 'win32'];
     }
     packageAvailable(packageInfo) {
-        return Promise.resolve(!!packageInfo[process.platform]);
+        let info = FallbackBackend.getInfo(packageInfo);
+        return Promise.resolve(!!(info.source && info.version));
     }
     install(packageInfo, outputListener) {
         let info = FallbackBackend.getInfo(packageInfo);
@@ -141,7 +142,6 @@ class FallbackBackend extends backend_1.default {
                 strip: info.strip || 0
             }));
         }).then(() => {
-            let bin = info.bin;
             if (!info.bin) {
                 return;
             }

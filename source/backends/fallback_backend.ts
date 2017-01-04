@@ -148,7 +148,8 @@ class FallbackBackend extends Backend<any> {
     }
 
     packageAvailable(packageInfo: any) {
-        return Promise.resolve(!!packageInfo[process.platform]);
+        let info = FallbackBackend.getInfo(packageInfo);
+        return Promise.resolve(!!(info.source && info.version));
     }
 
     install(packageInfo: any, outputListener: (data: string) => void) {
@@ -184,7 +185,6 @@ class FallbackBackend extends Backend<any> {
                             strip: info.strip || 0
                         }));
             }).then(() => {
-                let bin = info.bin;
                 if (!info.bin) {
                     return;
                 }
