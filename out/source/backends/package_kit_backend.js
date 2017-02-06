@@ -22,7 +22,7 @@ class PackageKitBackend extends backend_1.default {
     install(packageInfo, outputListener) {
         return this.resolvePackageName(packageInfo)
             .then((name) => new Promise((resolve) => name
-            ? cp.spawn(this.command, ['--plain', '--noninteractive', 'install', name])
+            ? cp.spawn(this.command, ['--noninteractive', 'install', name])
                 .on('exit', resolve)
                 .stdout.on('data', (data) => outputListener(data.toString()))
             : resolve())).then(() => undefined);
