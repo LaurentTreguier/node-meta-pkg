@@ -6,7 +6,7 @@ declare class PackageKitBackend extends Backend<PackageInfo> {
     readonly command: string;
     readonly platforms: string[];
     packageAvailable(packageInfo: PackageInfo): Promise<boolean>;
-    install(packageInfo: PackageInfo, outputListener: (data: string) => void): Promise<any>;
+    install(name: string, packageInfo: PackageInfo, outputListener: (data: string) => void): Promise<any>;
     private resolvePackageName(packageInfo);
 }
 export default PackageKitBackend;

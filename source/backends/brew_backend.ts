@@ -20,7 +20,7 @@ class BrewBackend extends Backend<string> {
         return ['darwin', 'linux'];
     }
 
-    install(packageName: string, outputListener: (data: string) => void) {
+    install(name: string, packageName: string, outputListener: (data: string) => void) {
         return new Promise<void>((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)

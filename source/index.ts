@@ -16,9 +16,14 @@ const backends: Backend<any>[] = [
     new ChocolateyBackend(),
     new FallbackBackend()
 ].filter((backend) => backend.available);
+let registeredPackages = new Map<string, Package>();
 
 export { Package }
 export type PackageInfo = string | Package;
+
+export function registerPackage(pkg: Package) {
+    registeredPackages.set(pkg.name, pkg);
+}
 
 export function isInstalled(packageInfo: PackageInfo) {
     return getPackage(packageInfo).then((pkg) => {
@@ -30,7 +35,7 @@ export function isInstalled(packageInfo: PackageInfo) {
 export function isUpgradable(packageInfo: PackageInfo) {
     return getPackage(packageInfo).then((pkg) =>
         pkg.backends.fallback
-            ? FallbackBackend.isUpgradable(pkg.backends.fallback)
+            ? FallbackBackend.isUpgradable(pkg.name, pkg.backends.fallback)
             : false);
 }
 
@@ -44,7 +49,8 @@ export function getInstallers(packageInfo: PackageInfo) {
         }).then(() => Promise.all(availableBackends.map((backend) =>
             backend.packageAvailable(resolvedPackage.backends[backend.name]))))
         .then((results) => availableBackends.filter((backend, i) => results[i]))
-        .then((actuallyAvailableBackends) => actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
+        .then((actuallyAvailableBackends) =>
+            actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
 }
 
 export function addRepo(repo: string) {
@@ -56,9 +62,14 @@ export function getFallbackPackagesPath() {
 }
 
 function getPackage(packageInfo: PackageInfo) {
-    return typeof (packageInfo) === 'string'
-        ? repoManager.getPackage(packageInfo)
-        : Promise.resolve(packageInfo);
+    if (typeof (packageInfo) !== 'string') {
+        registerPackage(packageInfo);
+        return Promise.resolve(packageInfo);
+    }
+
+    return registeredPackages.has(packageInfo)
+        ? Promise.resolve(registeredPackages.get(packageInfo))
+        : repoManager.getPackage(packageInfo);
 }
 
 export class Installer {
@@ -66,6 +77,10 @@ export class Installer {
     private _package: Package;
 
     get name() {
+        return this._backend.name;
+    }
+
+    get prettyName() {
         return this._backend.prettyName;
     }
 
@@ -79,7 +94,8 @@ export class Installer {
         return isInstalled(this._package)
             .then((installed) => {
                 alreadyInstalled = installed;
-                return this._backend.install(this._package.backends[this._backend.name],
+                return this._backend.install(this._package.name,
+                    this._package.backends[this._backend.name],
                     outputListener || (() => { }));
             }).then(() => alreadyInstalled);
     }

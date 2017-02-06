@@ -1,6 +1,7 @@
 'use strict';
 
 import * as os from 'os';
+import * as cp from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as request from 'request';
@@ -22,14 +23,15 @@ const PACKAGES_DIR_PATH = path.join(os.homedir(),
 const PACKAGES_DB = 'packages.json';
 const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 
-abstract class Info {
+interface Info {
     source?: string;
     version?: string | FeedVersion;
+    build?: Array<any>;
     bin?: string | string[];
     strip?: number;
 }
 
-abstract class FeedVersion {
+interface FeedVersion {
     feed: string;
     regexp: string | RegExp;
 }
@@ -43,20 +45,20 @@ class FallbackBackend extends Backend<any> {
         return PACKAGES_DIR_PATH;
     }
 
-    static isUpgradable(packageInfo: any): PromiseLike<boolean> {
+    static isUpgradable(name: string, packageInfo: any): PromiseLike<boolean> {
         let info = FallbackBackend.getInfo(packageInfo);
 
         return FallbackBackend
             .init()
             .then(() => {
                 let versionData = info.version
-                return versionData instanceof FeedVersion
+                return typeof versionData !== 'string'
                     ? FallbackBackend.retrieveLatestVersion(versionData)
                     : versionData;
             }).then((latestVersion) => new Promise((resolve) =>
                 fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
                     let installedPackages = jsonObject || {};
-                    resolve(installedPackages[packageInfo.name].version !== latestVersion);
+                    resolve(installedPackages[name].version !== latestVersion);
                 })));
     }
 
@@ -79,10 +81,11 @@ class FallbackBackend extends Backend<any> {
 
     private static getInfo(packageInfo: any) {
         let platformInfo: string | Info = packageInfo[process.platform];
-        let info: Info = platformInfo instanceof Info ? platformInfo : { source: platformInfo };
+        let info: Info = (typeof platformInfo !== 'string') ? platformInfo : { source: platformInfo };
 
         info.source = info.source || packageInfo.source;
         info.version = info.version || packageInfo.version;
+        info.build = info.build || packageInfo.build;
         info.bin = info.bin || packageInfo.bin;
         info.strip = info.strip || packageInfo.strip;
 
@@ -91,7 +94,7 @@ class FallbackBackend extends Backend<any> {
 
     private static retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void) {
         if (outputListener) {
-            outputListener('Fetching version number...\n');
+            outputListener('Fetching version number...' + os.EOL);
         }
 
         return new Promise((resolve) => {
@@ -103,7 +106,7 @@ class FallbackBackend extends Backend<any> {
                 let matches: string[] = [];
 
                 parser.ontext = (text) => {
-                    let match = text.match(version.regexp instanceof RegExp
+                    let match = text.match(typeof version.regexp !== 'string'
                         ? version.regexp
                         : new RegExp(version.regexp));
 
@@ -115,7 +118,7 @@ class FallbackBackend extends Backend<any> {
                 parser.onend = () => {
                     resolve(matches.reduce((previous, current) =>
                         previous > current ? previous : current
-                    ))
+                    ));
                 };
 
                 parser.write(feed).end();
@@ -149,7 +152,7 @@ class FallbackBackend extends Backend<any> {
         return Promise.resolve(!!(info.source && info.version));
     }
 
-    install(packageInfo: any, outputListener: (data: string) => void) {
+    install(name: string, packageInfo: any, outputListener: (data: string) => void) {
         let info: Info = FallbackBackend.getInfo(packageInfo);
         let packageUrl: string;
         let version: string;
@@ -159,44 +162,70 @@ class FallbackBackend extends Backend<any> {
             .init()
             .then(() => {
                 let versionData = info.version
-                return versionData instanceof Object
-                    ? FallbackBackend.retrieveLatestVersion(<FeedVersion>versionData, outputListener)
+                return typeof versionData !== 'string'
+                    ? FallbackBackend.retrieveLatestVersion(versionData, outputListener)
                     : versionData;
             }).then((ver: string) => {
-                outputListener(`Installing ${packageInfo.name} at version ${ver}\n`);
+                outputListener(`Installing ${name} at version ${ver}${os.EOL}`);
                 packageUrl = info.source.replace(/%VERSION%/g, ver);
                 version = ver;
             }).then(() => new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p))))
             .then((p: string) => new Promise((resolve) => {
-                outputListener('Downloading package...\n');
+                outputListener('Downloading package...' + os.EOL);
                 request.get(packageUrl)
                     .pipe(fs.createWriteStream(p))
                     .on('close', resolve.bind(null, p));
             })).then((p: string) => {
-                outputListener('Decompressing package...\n');
-                let packagePath = path.join(PACKAGES_DIR_PATH, packageInfo.name);
+                outputListener('Decompressing package...' + os.EOL);
+                let packagePath = path.join(PACKAGES_DIR_PATH, name);
                 return new Promise((resolve) => fs.remove(packagePath, resolve))
-                    .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }));
+                    .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
+                    .then(() => packagePath);
+            }).then((packagePath: string) => {
+                if (!info.build) {
+                    return;
+                }
+
+                outputListener('Building package...' + os.EOL);
+                let batchPromises = Promise.resolve(null);
+
+                info.build.forEach((batch) => {
+                    batchPromises = batchPromises.then(() => {
+                        let commandPromises: Promise<any>[] = [];
+
+                        for (let command in batch) {
+                            commandPromises.push(new Promise((resolve) => {
+                                cp.exec(command,
+                                    { cwd: path.join(packagePath, batch[command]) },
+                                    resolve);
+                            }));
+                        }
+
+                        return Promise.all(commandPromises);
+                    });
+                });
+
+                return batchPromises;
             }).then(() => {
                 if (!info.bin) {
                     return;
                 }
 
-                binaries = info.bin instanceof Array ? info.bin : [info.bin];
+                binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
                 FallbackBackend.completePath();
             }).then(() => new Promise((resolve) => {
-                outputListener('Registering package...\n');
+                outputListener('Registering package...' + os.EOL);
                 fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) =>
                     resolve(jsonObject || {}));
             })).then((installedPackages) => {
-                installedPackages[packageInfo.name] = {
+                installedPackages[name] = {
                     version: version,
                     bin: binaries.map((bin) => path.basename(bin))
                 };
 
                 return new Promise((resolve) =>
                     fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
-            }).then(() => outputListener('Package installed\n'));
+            }).then(() => outputListener('Package installed' + os.EOL));
     }
 }
 
