@@ -28,17 +28,17 @@
   "license": "GPL-3.0",
   "dependencies": {
     "decompress": "^4.0.0",
-    "fs-extra": "^1.0.0",
+    "fs-extra": "^2.0.0",
     "request": "^2.79.0",
     "sax": "^1.2.1",
     "tmp": "^0.0.31"
   },
   "devDependencies": {
-    "@types/fs-extra": "^0.0.35",
-    "@types/node": "^6.0.56",
+    "@types/fs-extra": "^0.0.37",
+    "@types/node": "^7.0.5",
     "@types/request": "^0.0.39",
     "@types/sax": "^0.0.28",
     "@types/tmp": "^0.0.32",
-    "typescript": "^2.1.4"
+    "typescript": "^2.1.5"
   }
 }
