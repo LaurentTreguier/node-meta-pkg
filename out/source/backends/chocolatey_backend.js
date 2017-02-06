@@ -14,7 +14,7 @@ class ChocolateyBackend extends backend_1.default {
     get platforms() {
         return ['win32'];
     }
-    install(packageName, outputListener) {
+    install(name, packageName, outputListener) {
         return new Promise((resolve) => {
             cp.spawn('powershell', ['-Command', `Start-Process choco -Verb Runas -ArgumentList 'install --yes ${packageName}' -Wait -WindowStyle Hidden`])
                 .on('exit', resolve)

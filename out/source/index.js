@@ -12,6 +12,11 @@ const backends = [
     new chocolatey_backend_1.default(),
     new fallback_backend_1.default()
 ].filter((backend) => backend.available);
+let registeredPackages = new Map();
+function registerPackage(pkg) {
+    registeredPackages.set(pkg.name, pkg);
+}
+exports.registerPackage = registerPackage;
 function isInstalled(packageInfo) {
     return getPackage(packageInfo).then((pkg) => {
         return pkg.targets.length
@@ -21,7 +26,7 @@ function isInstalled(packageInfo) {
 exports.isInstalled = isInstalled;
 function isUpgradable(packageInfo) {
     return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
-        ? fallback_backend_1.default.isUpgradable(pkg.backends.fallback)
+        ? fallback_backend_1.default.isUpgradable(pkg.name, pkg.backends.fallback)
         : false);
 }
 exports.isUpgradable = isUpgradable;
@@ -46,12 +51,19 @@ function getFallbackPackagesPath() {
 }
 exports.getFallbackPackagesPath = getFallbackPackagesPath;
 function getPackage(packageInfo) {
-    return typeof (packageInfo) === 'string'
-        ? repoManager.getPackage(packageInfo)
-        : Promise.resolve(packageInfo);
+    if (typeof (packageInfo) !== 'string') {
+        registerPackage(packageInfo);
+        return Promise.resolve(packageInfo);
+    }
+    return registeredPackages.has(packageInfo)
+        ? Promise.resolve(registeredPackages.get(packageInfo))
+        : repoManager.getPackage(packageInfo);
 }
 class Installer {
     get name() {
+        return this._backend.name;
+    }
+    get prettyName() {
         return this._backend.prettyName;
     }
     constructor(backend, pkg) {
@@ -63,7 +75,7 @@ class Installer {
         return isInstalled(this._package)
             .then((installed) => {
             alreadyInstalled = installed;
-            return this._backend.install(this._package.backends[this._backend.name], outputListener || (() => { }));
+            return this._backend.install(this._package.name, this._package.backends[this._backend.name], outputListener || (() => { }));
         }).then(() => alreadyInstalled);
     }
 }

@@ -4,6 +4,6 @@ declare class ChocolateyBackend extends Backend<string> {
     readonly prettyName: string;
     readonly command: string;
     readonly platforms: string[];
-    install(packageName: string, outputListener: (data: string) => void): Promise<void>;
+    install(name: string, packageName: string, outputListener: (data: string) => void): Promise<void>;
 }
 export default ChocolateyBackend;

@@ -19,7 +19,7 @@ class PackageKitBackend extends backend_1.default {
         return this.resolvePackageName(packageInfo)
             .then((name) => !!name);
     }
-    install(packageInfo, outputListener) {
+    install(name, packageInfo, outputListener) {
         return this.resolvePackageName(packageInfo)
             .then((name) => new Promise((resolve) => name
             ? cp.spawn(this.command, ['--noninteractive', 'install', name])
@@ -28,7 +28,7 @@ class PackageKitBackend extends backend_1.default {
             : resolve())).then(() => undefined);
     }
     resolvePackageName(packageInfo) {
-        let packageNames = packageInfo instanceof Array ? packageInfo : [packageInfo];
+        let packageNames = typeof packageInfo !== 'string' ? packageInfo : [packageInfo];
         return Promise.all(packageNames.map((packageName) => new Promise((resolve) => {
             let pkresolve = cp.spawn(this.command, ['--plain', 'resolve', packageName], { env: { LANG: 'C' } });
             let reader = rl.createInterface(pkresolve.stdout, null);

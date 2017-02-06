@@ -14,7 +14,7 @@ class BrewBackend extends backend_1.default {
     get platforms() {
         return ['darwin', 'linux'];
     }
-    install(packageName, outputListener) {
+    install(name, packageName, outputListener) {
         return new Promise((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)
