@@ -9,9 +9,6 @@ import * as tmp from 'tmp';
 import Backend from '../backend';
 let decompress = require('decompress');
 
-let decompressPlugins = ['unzip', 'tar', 'tarbz2', 'targz', 'tarxz']
-    .map((type) => require('decompress-' + type)());
-
 const DATA_DIR = {
     darwin: 'Library/Application Support',
     win32: 'AppData/Roaming',
@@ -179,11 +176,7 @@ class FallbackBackend extends Backend<any> {
                 outputListener('Decompressing package...\n');
                 let packagePath = path.join(PACKAGES_DIR_PATH, packageInfo.name);
                 return new Promise((resolve) => fs.remove(packagePath, resolve))
-                    .then(decompress.bind(null, p, packagePath,
-                        {
-                            plugins: decompressPlugins,
-                            strip: info.strip || 0
-                        }));
+                    .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }));
             }).then(() => {
                 if (!info.bin) {
                     return;
