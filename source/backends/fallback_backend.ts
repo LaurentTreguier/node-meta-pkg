@@ -81,7 +81,7 @@ class FallbackBackend extends Backend<any> {
 
     private static getInfo(packageInfo: any) {
         let platformInfo: string | Info = packageInfo[process.platform];
-        let info: Info = (typeof platformInfo !== 'string') ? platformInfo : { source: platformInfo };
+        let info: Info = (typeof platformInfo !== 'string') ? platformInfo || {} : { source: platformInfo };
 
         info.source = info.source || packageInfo.source;
         info.version = info.version || packageInfo.version;
