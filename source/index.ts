@@ -26,10 +26,8 @@ export function registerPackage(pkg: Package) {
 }
 
 export function isInstalled(packageInfo: PackageInfo) {
-    return getPackage(packageInfo).then((pkg) => {
-        return pkg.targets.length
-            && pkg.targets.every(util.checkExistence);
-    });
+    return getPackage(packageInfo)
+        .then((pkg) => pkg.targets.length && pkg.targets.every(util.checkExistence));
 }
 
 export function isUpgradable(packageInfo: PackageInfo) {

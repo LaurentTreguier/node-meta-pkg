@@ -18,10 +18,8 @@ function registerPackage(pkg) {
 }
 exports.registerPackage = registerPackage;
 function isInstalled(packageInfo) {
-    return getPackage(packageInfo).then((pkg) => {
-        return pkg.targets.length
-            && pkg.targets.every(util.checkExistence);
-    });
+    return getPackage(packageInfo)
+        .then((pkg) => pkg.targets.length && pkg.targets.every(util.checkExistence));
 }
 exports.isInstalled = isInstalled;
 function isUpgradable(packageInfo) {

@@ -40,7 +40,12 @@ class FallbackBackend extends backend_1.default {
     }
     static completePath() {
         let sep = (process.platform === 'win32' ? ';' : ':');
-        let packages = fs.readJSONSync(PACKAGES_DB_PATH);
+        let packages = [];
+        try {
+            fs.accessSync(PACKAGES_DB_PATH);
+            fs.readJSONSync(PACKAGES_DB_PATH);
+        }
+        catch (err) { }
         for (let name in packages) {
             if (packages[name].bin) {
                 packages[name].bin.forEach((bin) => {
