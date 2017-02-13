@@ -35,7 +35,8 @@ class FallbackBackend extends backend_1.default {
                 : versionData;
         }).then((latestVersion) => new Promise((resolve) => fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
             let installedPackages = jsonObject || {};
-            resolve(installedPackages[name].version !== latestVersion);
+            resolve(installedPackages[name]
+                && installedPackages[name].version !== latestVersion);
         })));
     }
     static completePath() {
