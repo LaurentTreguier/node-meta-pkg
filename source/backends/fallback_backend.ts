@@ -65,11 +65,11 @@ class FallbackBackend extends Backend<any> {
 
     private static completePath() {
         let sep = (process.platform === 'win32' ? ';' : ':');
-        let packages = [];
+        let packages = {};
 
         try {
             fs.accessSync(PACKAGES_DB_PATH);
-            fs.readJSONSync(PACKAGES_DB_PATH);
+            packages = fs.readJSONSync(PACKAGES_DB_PATH);
         } catch (err) { }
 
         for (let name in packages) {
