@@ -19,6 +19,10 @@ export interface FeedVersion {
 export function checkExistence(command: string) {
     let isWin = process.platform === 'win32';
 
+    if (!command) {
+        return false;
+    }
+
     for (let dir of process.env.PATH.split(isWin ? ';' : ':')) {
         for (let extension of [''].concat(isWin ? ['.exe', '.bat', '.cmd'] : [])) {
             try {
@@ -27,8 +31,6 @@ export function checkExistence(command: string) {
             } catch (e) { }
         }
     }
-
-    return !command;
 }
 
 export function getInfo(packageInfo: any) {

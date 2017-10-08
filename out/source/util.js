@@ -7,6 +7,9 @@ const request = require("request");
 const sax = require("sax");
 function checkExistence(command) {
     let isWin = process.platform === 'win32';
+    if (!command) {
+        return false;
+    }
     for (let dir of process.env.PATH.split(isWin ? ';' : ':')) {
         for (let extension of [''].concat(isWin ? ['.exe', '.bat', '.cmd'] : [])) {
             try {
@@ -16,7 +19,6 @@ function checkExistence(command) {
             catch (e) { }
         }
     }
-    return !command;
 }
 exports.checkExistence = checkExistence;
 function getInfo(packageInfo) {
