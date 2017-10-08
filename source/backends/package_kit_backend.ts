@@ -3,6 +3,7 @@
 import * as cp from 'child_process';
 import * as rl from 'readline';
 import Backend from '../backend';
+import * as util from '../util';
 
 export type PackageInfo = string | string[];
 
@@ -28,7 +29,7 @@ class PackageKitBackend extends Backend<PackageInfo> {
             .then((name) => !!name);
     }
 
-    install(name: string, packageInfo: PackageInfo, outputListener: (data: string) => void) {
+    install(basicInfo: util.BasicInfo, packageInfo: PackageInfo, outputListener: (data: string) => void) {
         return this.resolvePackageName(packageInfo)
             .then((name) => new Promise((resolve) => name
                 ? cp.spawn(this.command, ['--noninteractive', 'install', name])

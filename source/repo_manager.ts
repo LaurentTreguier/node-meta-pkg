@@ -10,8 +10,8 @@ class RepoManager {
         this._repos.push(repo);
     }
 
-    getPackage(packageName: string): PromiseLike<Package> {
-        return Promise.race(this._repos.map((repo) => new Promise((resolve) => {
+    getPackage(packageName: string): Promise<Package> {
+        return Promise.race(this._repos.map((repo) => new Promise<Package>((resolve) => {
             request.get(`${repo}/${packageName}.json`, (err, message, body) => {
                 if (!err && message.statusCode / 100 === 2) {
                     resolve(JSON.parse(body));

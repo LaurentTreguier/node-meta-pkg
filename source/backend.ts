@@ -9,7 +9,7 @@ abstract class Backend<T> {
     abstract get prettyName(): string;
     abstract get command(): string;
     abstract get platforms(): string[];
-    abstract install(name: string, packageInfo: T, outputListener: (data: string) => void): PromiseLike<void>;
+    abstract install(basicInfo: util.BasicInfo, packageInfo: T, outputListener: (data: string) => void): PromiseLike<void>;
 
     get available() {
         return util.checkExistence(this.command) && this.platforms.indexOf(process.platform) !== -1;

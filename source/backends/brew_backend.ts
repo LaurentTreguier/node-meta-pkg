@@ -2,6 +2,7 @@
 
 import * as cp from 'child_process';
 import Backend from '../backend';
+import * as util from '../util';
 
 class BrewBackend extends Backend<string> {
     get name() {
@@ -20,7 +21,7 @@ class BrewBackend extends Backend<string> {
         return ['darwin', 'linux'];
     }
 
-    install(name: string, packageName: string, outputListener: (data: string) => void) {
+    install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
         return new Promise<void>((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)

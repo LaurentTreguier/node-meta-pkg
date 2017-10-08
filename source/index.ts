@@ -21,23 +21,23 @@ let registeredPackages = new Map<string, Package>();
 export { Package }
 export type PackageInfo = string | Package;
 
-export function registerPackage(pkg: Package) {
+export function registerPackage(pkg: Package): void {
     registeredPackages.set(pkg.name, pkg);
 }
 
-export function isInstalled(packageInfo: PackageInfo) {
+export function isInstalled(packageInfo: PackageInfo): Promise<boolean> {
     return getPackage(packageInfo)
         .then((pkg) => pkg.targets.length && pkg.targets.every(util.checkExistence));
 }
 
-export function isUpgradable(packageInfo: PackageInfo) {
+export function isUpgradable(packageInfo: PackageInfo): Promise<boolean> {
     return getPackage(packageInfo).then((pkg) =>
         pkg.backends.fallback
-            ? FallbackBackend.isUpgradable(pkg.name, pkg.backends.fallback)
+            ? FallbackBackend.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
             : false);
 }
 
-export function getInstallers(packageInfo: PackageInfo) {
+export function getInstallers(packageInfo: PackageInfo): Promise<Installer[]> {
     let availableBackends: Backend<any>[];
     let resolvedPackage: Package;
     return getPackage(packageInfo)
@@ -51,11 +51,11 @@ export function getInstallers(packageInfo: PackageInfo) {
             actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
 }
 
-export function addRepo(repo: string) {
+export function addRepo(repo: string): void {
     repoManager.addRepo(repo);
 }
 
-export function getFallbackPackagesPath() {
+export function getFallbackPackagesPath(): string {
     return FallbackBackend.packagesPath;
 }
 
@@ -91,8 +91,13 @@ export class Installer {
         let alreadyInstalled: boolean;
         return isInstalled(this._package)
             .then((installed) => {
+                let basicInfo = {
+                    name: this._package.name,
+                    version: this._package.version
+                };
+
                 alreadyInstalled = installed;
-                return this._backend.install(this._package.name,
+                return this._backend.install(basicInfo,
                     this._package.backends[this._backend.name],
                     outputListener || (() => { }));
             }).then(() => alreadyInstalled);
