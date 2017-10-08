@@ -48,7 +48,7 @@ export function retrieveLatestVersion(version: FeedVersion, outputListener?: (da
     }).then((feed: string) => {
         let parser = sax.parser(false, null);
 
-        return new Promise((resolve) => {
+        return new Promise<string>((resolve) => {
             let matches: string[] = [];
 
             parser.ontext = (text) => {
@@ -69,5 +69,5 @@ export function retrieveLatestVersion(version: FeedVersion, outputListener?: (da
 
             parser.write(feed).end();
         });
-    });
+    }).catch((err) => '');
 }

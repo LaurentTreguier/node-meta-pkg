@@ -26,7 +26,7 @@ exports.isInstalled = isInstalled;
 function isUpgradable(packageInfo) {
     return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
         ? fallback_backend_1.default.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
-        : false);
+        : Promise.resolve(false));
 }
 exports.isUpgradable = isUpgradable;
 function getInstallers(packageInfo) {

@@ -8,4 +8,4 @@ export interface FeedVersion {
 }
 export declare function checkExistence(command: string): boolean;
 export declare function getInfo(packageInfo: any): any;
-export declare function retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void): Promise<{}>;
+export declare function retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void): Promise<string>;

@@ -34,7 +34,7 @@ export function isUpgradable(packageInfo: PackageInfo): Promise<boolean> {
     return getPackage(packageInfo).then((pkg) =>
         pkg.backends.fallback
             ? FallbackBackend.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
-            : false);
+            : Promise.resolve(false));
 }
 
 export function getInstallers(packageInfo: PackageInfo): Promise<Installer[]> {

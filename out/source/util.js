@@ -48,7 +48,7 @@ function retrieveLatestVersion(version, outputListener) {
             };
             parser.write(feed).end();
         });
-    });
+    }).catch((err) => '');
 }
 exports.retrieveLatestVersion = retrieveLatestVersion;
 //# sourceMappingURL=util.js.map
