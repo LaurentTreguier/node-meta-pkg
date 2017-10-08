@@ -2,12 +2,12 @@
 
 MetaPkg is a simple node module that can install software using already existing means such as package managers or using local installations.
 
-|OS     |PackageKit|Native installer|Homebrew/Linuxbrew|Chocolatey|Fallback|
-|-------|----------|----------------|------------------|----------|--------|
-|Windows|          |planned         |                  |partial   |yes     |
-|macOS  |          |planned         |yes               |          |yes     |
-|Linux  |yes       |                |yes               |          |yes     |
-|FreeBSD|yes       |                |                  |          |yes     |
+|OS     |PackageKit|Native installer|Homebrew/Linuxbrew|Chocolatey         |Fallback|
+|-------|----------|----------------|------------------|-------------------|--------|
+|Windows|          |planned         |                  |partial (see issue)|yes     |
+|macOS  |          |planned         |yes               |                   |yes     |
+|Linux  |yes       |                |yes               |                   |yes     |
+|FreeBSD|yes       |                |                  |                   |yes     |
 
 ## The structure of a package
 
@@ -17,16 +17,17 @@ Packages are simple JSONs. Two mains fields are required: `targets` and `backend
 
 ```json
 {
+    "name": "foobar",
     "targets": ["foobar"],
     "backends": {
         "packagekit": ["foobar", "FooBar"],
         "brew": "foobar",
         "installer": {
-            "darwin": "www.example.com/downloads/foobar.dmg",
+            "version": "1.0.0",
+            "darwin": "www.example.com/downloads/foobar-%VERSION%.dmg",
             "win32": "www.example.com/downloads/foobar.msi"
         },
         "fallback": {
-            "name": "foobar",
             "version": "1.0.0",
             "linux": {
                 "source": "www.example.com/downloads/foobar-src-%VERSION%.tar.gz",
@@ -73,7 +74,7 @@ Packages are simple JSONs. Two mains fields are required: `targets` and `backend
     - `strip` (optional): same as the above `strip`, but can override it for a specific OS.
 
 ## API
-This guide uses Typescript notations for types.
+This document uses Typescript notation.
 
 ### `type PackageInfo = string | Package`
 Represents a package either by its name if it is available in a repository, or by a raw package instance.
@@ -81,13 +82,13 @@ Represents a package either by its name if it is available in a repository, or b
 ### `function registerPackage(pkg: Package): void`
 Registers a package for later use. Packages can be used simply with their name after being registered.
 
-### `function isInstalled(packageInfo: PackageInfo): PromiseLike<boolean>`
+### `function isInstalled(packageInfo: PackageInfo): Promise<boolean>`
 Returns a `Promise` resolving `true` if the package is already installed and `false` otherwise.
 
-### `function isUpgradable(packageInfo: PackageInfo): PromiseLike<boolean>`
+### `function isUpgradable(packageInfo: PackageInfo): Promise<boolean>`
 Returns a `Promise` resolving `true` if the package can be upgraded and `false` otherwise. Only packages installed with the fallback method will be considered
 
-### `function getInstallers(packageInfo: PackageInfo): : PromiseLike<Installer[]>`
+### `function getInstallers(packageInfo: PackageInfo): : Promise<Installer[]>`
 Returns a `Promise` resolving an array of installers for the package represented by `packageInfo`.
 
 ### `function addRepo(url: string): void`
