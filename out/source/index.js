@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const repo_manager_1 = require("./repo_manager");
 const package_kit_backend_1 = require("./backends/package_kit_backend");
 const brew_backend_1 = require("./backends/brew_backend");
@@ -24,7 +25,7 @@ function isInstalled(packageInfo) {
 exports.isInstalled = isInstalled;
 function isUpgradable(packageInfo) {
     return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
-        ? fallback_backend_1.default.isUpgradable(pkg.name, pkg.backends.fallback)
+        ? fallback_backend_1.default.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
         : false);
 }
 exports.isUpgradable = isUpgradable;
@@ -72,8 +73,12 @@ class Installer {
         let alreadyInstalled;
         return isInstalled(this._package)
             .then((installed) => {
+            let basicInfo = {
+                name: this._package.name,
+                version: this._package.version
+            };
             alreadyInstalled = installed;
-            return this._backend.install(this._package.name, this._package.backends[this._backend.name], outputListener || (() => { }));
+            return this._backend.install(basicInfo, this._package.backends[this._backend.name], outputListener || (() => { }));
         }).then(() => alreadyInstalled);
     }
 }

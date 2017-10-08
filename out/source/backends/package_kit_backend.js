@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const cp = require("child_process");
 const rl = require("readline");
 const backend_1 = require("../backend");
@@ -19,7 +20,7 @@ class PackageKitBackend extends backend_1.default {
         return this.resolvePackageName(packageInfo)
             .then((name) => !!name);
     }
-    install(name, packageInfo, outputListener) {
+    install(basicInfo, packageInfo, outputListener) {
         return this.resolvePackageName(packageInfo)
             .then((name) => new Promise((resolve) => name
             ? cp.spawn(this.command, ['--noninteractive', 'install', name])
@@ -45,6 +46,5 @@ class PackageKitBackend extends backend_1.default {
         }))).then((names) => names.find((name) => name.length > 0));
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = PackageKitBackend;
 //# sourceMappingURL=package_kit_backend.js.map

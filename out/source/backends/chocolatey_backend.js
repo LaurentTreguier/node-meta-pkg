@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const cp = require("child_process");
 const backend_1 = require("../backend");
 class ChocolateyBackend extends backend_1.default {
@@ -14,7 +15,7 @@ class ChocolateyBackend extends backend_1.default {
     get platforms() {
         return ['win32'];
     }
-    install(name, packageName, outputListener) {
+    install(basicInfo, packageName, outputListener) {
         return new Promise((resolve) => {
             cp.spawn('powershell', ['-Command', `Start-Process choco -Verb Runas -ArgumentList 'install --yes ${packageName}' -Wait -WindowStyle Hidden`])
                 .on('exit', resolve)
@@ -22,6 +23,5 @@ class ChocolateyBackend extends backend_1.default {
         });
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ChocolateyBackend;
 //# sourceMappingURL=chocolatey_backend.js.map

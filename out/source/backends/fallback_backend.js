@@ -1,43 +1,44 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const os = require("os");
 const cp = require("child_process");
 const path = require("path");
 const fs = require("fs-extra");
 const request = require("request");
-const sax = require("sax");
 const tmp = require("tmp");
 const backend_1 = require("../backend");
+const util = require("../util");
 let decompress = require('decompress');
 const DATA_DIR = {
-    darwin: 'Library/Application Support',
-    win32: 'AppData/Roaming',
-    default: '.local/share'
+    darwin: path.join('Library', 'Application Support'),
+    win32: path.join('AppData', 'Local'),
+    default: path.join('.local', 'share')
 };
 const PACKAGES_DIR = 'MetaPkg';
 const PACKAGES_DIR_PATH = path.join(os.homedir(), DATA_DIR[process.platform] || DATA_DIR.default, PACKAGES_DIR);
 const PACKAGES_DB = 'packages.json';
 const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 class FallbackBackend extends backend_1.default {
-    static init() {
-        return new Promise((resolve) => fs.ensureFile(PACKAGES_DB_PATH, resolve));
-    }
     static get packagesPath() {
         return PACKAGES_DIR_PATH;
     }
-    static isUpgradable(name, packageInfo) {
-        let info = FallbackBackend.getInfo(packageInfo);
+    static isUpgradable(basicInfo, packageInfo) {
+        let info = util.getInfo(packageInfo);
         return FallbackBackend
             .init()
             .then(() => {
             let versionData = info.version;
             return typeof versionData !== 'string'
-                ? FallbackBackend.retrieveLatestVersion(versionData)
+                ? util.retrieveLatestVersion(versionData)
                 : versionData;
         }).then((latestVersion) => new Promise((resolve) => fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
             let installedPackages = jsonObject || {};
-            resolve(installedPackages[name]
-                && installedPackages[name].version !== latestVersion);
+            resolve(installedPackages[basicInfo.name]
+                && installedPackages[basicInfo.name].version !== latestVersion);
         })));
+    }
+    static init() {
+        return new Promise((resolve) => fs.ensureFile(PACKAGES_DB_PATH, resolve));
     }
     static completePath() {
         let sep = (process.platform === 'win32' ? ';' : ':');
@@ -58,41 +59,6 @@ class FallbackBackend extends backend_1.default {
             }
         }
     }
-    static getInfo(packageInfo) {
-        let platformInfo = packageInfo[process.platform];
-        let info = (typeof platformInfo !== 'string') ? platformInfo || {} : { source: platformInfo };
-        info.source = info.source || packageInfo.source;
-        info.version = info.version || packageInfo.version;
-        info.build = info.build || packageInfo.build;
-        info.bin = info.bin || packageInfo.bin;
-        info.strip = info.strip || packageInfo.strip;
-        return info;
-    }
-    static retrieveLatestVersion(version, outputListener) {
-        if (outputListener) {
-            outputListener('Fetching version number...' + os.EOL);
-        }
-        return new Promise((resolve) => {
-            request.get(version.feed, (err, message, body) => resolve(body));
-        }).then((feed) => {
-            let parser = sax.parser(false, null);
-            return new Promise((resolve) => {
-                let matches = [];
-                parser.ontext = (text) => {
-                    let match = text.match(typeof version.regexp !== 'string'
-                        ? version.regexp
-                        : new RegExp(version.regexp));
-                    if (match) {
-                        matches.push(match[1]);
-                    }
-                };
-                parser.onend = () => {
-                    resolve(matches.reduce((previous, current) => previous > current ? previous : current));
-                };
-                parser.write(feed).end();
-            });
-        });
-    }
     constructor() {
         super();
         FallbackBackend.completePath();
@@ -110,34 +76,34 @@ class FallbackBackend extends backend_1.default {
         return ['darwin', 'freebsd', 'linux', 'win32'];
     }
     packageAvailable(packageInfo) {
-        let info = FallbackBackend.getInfo(packageInfo);
-        return Promise.resolve(!!(info.source && info.version));
+        let info = util.getInfo(packageInfo);
+        return Promise.resolve(!!(info.source));
     }
-    install(name, packageInfo, outputListener) {
-        let info = FallbackBackend.getInfo(packageInfo);
+    install(basicInfo, packageInfo, outputListener) {
+        let info = util.getInfo(packageInfo);
         let packageUrl;
         let version;
         let binaries = [];
         return FallbackBackend
             .init()
             .then(() => {
-            let versionData = info.version;
+            let versionData = info.version || basicInfo.version;
             return typeof versionData !== 'string'
-                ? FallbackBackend.retrieveLatestVersion(versionData, outputListener)
+                ? util.retrieveLatestVersion(versionData, outputListener)
                 : versionData;
         }).then((ver) => {
-            outputListener(`Installing ${name} at version ${ver}${os.EOL}`);
+            outputListener(`Installing ${basicInfo.name} at version ${ver}${os.EOL}`);
             packageUrl = info.source.replace(/%VERSION%/g, ver);
             version = ver;
-        }).then(() => new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p))))
-            .then((p) => new Promise((resolve) => {
+            return new Promise((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p)));
+        }).then((p) => new Promise((resolve) => {
             outputListener('Downloading package...' + os.EOL);
             request.get(packageUrl)
                 .pipe(fs.createWriteStream(p))
                 .on('close', resolve.bind(null, p));
         })).then((p) => {
             outputListener('Decompressing package...' + os.EOL);
-            let packagePath = path.join(PACKAGES_DIR_PATH, name);
+            let packagePath = path.join(PACKAGES_DIR_PATH, basicInfo.name);
             return new Promise((resolve) => fs.remove(packagePath, resolve))
                 .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
                 .then(() => packagePath);
@@ -169,7 +135,7 @@ class FallbackBackend extends backend_1.default {
             outputListener('Registering package...' + os.EOL);
             fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => resolve(jsonObject || {}));
         })).then((installedPackages) => {
-            installedPackages[name] = {
+            installedPackages[basicInfo.name] = {
                 version: version,
                 bin: binaries.map((bin) => path.basename(bin))
             };
@@ -177,6 +143,5 @@ class FallbackBackend extends backend_1.default {
         }).then(() => outputListener('Package installed' + os.EOL));
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = FallbackBackend;
 //# sourceMappingURL=fallback_backend.js.map

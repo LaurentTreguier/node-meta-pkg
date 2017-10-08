@@ -1,9 +1,10 @@
 import Backend from '../backend';
+import * as util from '../util';
 declare class BrewBackend extends Backend<string> {
     readonly name: string;
     readonly prettyName: string;
     readonly command: string;
     readonly platforms: string[];
-    install(name: string, packageName: string, outputListener: (data: string) => void): Promise<void>;
+    install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void): Promise<void>;
 }
 export default BrewBackend;

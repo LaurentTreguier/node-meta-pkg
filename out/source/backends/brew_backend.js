@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const cp = require("child_process");
 const backend_1 = require("../backend");
 class BrewBackend extends backend_1.default {
@@ -14,7 +15,7 @@ class BrewBackend extends backend_1.default {
     get platforms() {
         return ['darwin', 'linux'];
     }
-    install(name, packageName, outputListener) {
+    install(basicInfo, packageName, outputListener) {
         return new Promise((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)
@@ -22,6 +23,5 @@ class BrewBackend extends backend_1.default {
         });
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = BrewBackend;
 //# sourceMappingURL=brew_backend.js.map

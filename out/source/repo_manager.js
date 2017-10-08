@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const request = require("request");
 class RepoManager {
     constructor() {
@@ -17,6 +18,5 @@ class RepoManager {
         })));
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RepoManager;
 //# sourceMappingURL=repo_manager.js.map

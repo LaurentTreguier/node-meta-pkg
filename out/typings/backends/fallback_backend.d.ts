@@ -1,17 +1,16 @@
 import Backend from '../backend';
+import * as util from '../util';
 declare class FallbackBackend extends Backend<any> {
-    static init(): PromiseLike<any>;
     static readonly packagesPath: string;
-    static isUpgradable(name: string, packageInfo: any): PromiseLike<boolean>;
+    static isUpgradable(basicInfo: util.BasicInfo, packageInfo: any): Promise<boolean>;
+    private static init();
     private static completePath();
-    private static getInfo(packageInfo);
-    private static retrieveLatestVersion(version, outputListener?);
     constructor();
     readonly name: string;
     readonly prettyName: string;
     readonly command: any;
     readonly platforms: string[];
     packageAvailable(packageInfo: any): Promise<boolean>;
-    install(name: string, packageInfo: any, outputListener: (data: string) => void): PromiseLike<any>;
+    install(basicInfo: util.BasicInfo, packageInfo: any, outputListener: (data: string) => void): Promise<void>;
 }
 export default FallbackBackend;
