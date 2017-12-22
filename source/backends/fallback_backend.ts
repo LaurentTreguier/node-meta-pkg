@@ -103,7 +103,7 @@ class FallbackBackend extends Backend<any> {
 
     packageAvailable(packageInfo: any) {
         let info = util.getInfo(packageInfo);
-        return Promise.resolve(!!(info.source));
+        return Promise.resolve(!!info.source);
     }
 
     install(basicInfo: util.BasicInfo, packageInfo: any, outputListener: (data: string) => void) {

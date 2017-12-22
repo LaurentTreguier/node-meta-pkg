@@ -20,7 +20,7 @@ export function checkExistence(command: string) {
     let isWin = process.platform === 'win32';
 
     if (!command) {
-        return false;
+        return true;
     }
 
     for (let dir of process.env.PATH.split(isWin ? ';' : ':')) {
@@ -31,6 +31,8 @@ export function checkExistence(command: string) {
             } catch (e) { }
         }
     }
+
+    return false;
 }
 
 export function getInfo(packageInfo: any) {

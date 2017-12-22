@@ -77,7 +77,7 @@ class FallbackBackend extends backend_1.default {
     }
     packageAvailable(packageInfo) {
         let info = util.getInfo(packageInfo);
-        return Promise.resolve(!!(info.source));
+        return Promise.resolve(!!info.source);
     }
     install(basicInfo, packageInfo, outputListener) {
         let info = util.getInfo(packageInfo);
