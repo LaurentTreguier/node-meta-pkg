@@ -3,8 +3,8 @@ import * as util from '../util';
 declare class FallbackBackend extends Backend<any> {
     static readonly packagesPath: string;
     static isUpgradable(basicInfo: util.BasicInfo, packageInfo: any): Promise<boolean>;
-    private static init();
-    private static completePath();
+    private static init;
+    private static completePath;
     constructor();
     readonly name: string;
     readonly prettyName: string;

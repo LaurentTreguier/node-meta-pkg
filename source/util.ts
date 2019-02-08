@@ -42,14 +42,16 @@ export function getInfo(packageInfo: any) {
     return Object.assign({}, packageInfo, info);
 }
 
-export function retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void) {
+export async function retrieveLatestVersion(version: FeedVersion, outputListener?: (data: string) => void) {
     if (outputListener) {
         outputListener('Fetching version number...' + os.EOL);
     }
 
-    return new Promise((resolve) => {
-        request.get(version.feed, (err, message, body) => resolve(body));
-    }).then((feed: string) => {
+    try {
+        const feed = await new Promise<string>((resolve) => {
+            request.get(version.feed, (err, message, body) => resolve(body.toString()));
+        });
+
         let parser = sax.parser(false, null);
 
         return new Promise<string>((resolve) => {
@@ -59,19 +61,17 @@ export function retrieveLatestVersion(version: FeedVersion, outputListener?: (da
                 let match = text.match(typeof version.regexp !== 'string'
                     ? version.regexp
                     : new RegExp(version.regexp));
-
                 if (match) {
                     matches.push(match[1]);
                 }
             };
-
             parser.onend = () => {
-                resolve(matches.reduce((previous, current) =>
-                    previous > current ? previous : current
-                ));
+                resolve(matches.reduce((previous, current) => previous > current ? previous : current));
             };
-
             parser.write(feed).end();
         });
-    }).catch((err) => '');
+    }
+    catch (err) {
+        return '';
+    }
 }

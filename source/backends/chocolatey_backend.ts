@@ -21,8 +21,8 @@ class ChocolateyBackend extends Backend<string> {
         return ['win32'];
     }
 
-    install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
-        return new Promise<void>((resolve) => {
+    async install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
+        await new Promise((resolve) => {
             cp.spawn('powershell', ['-Command', `Start-Process choco -Verb Runas -ArgumentList 'install --yes ${packageName}' -Wait -WindowStyle Hidden`])
                 .on('exit', resolve)
                 .stdout.on('data', (data) => outputListener(data.toString()));

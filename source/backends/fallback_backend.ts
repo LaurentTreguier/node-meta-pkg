@@ -36,22 +36,19 @@ class FallbackBackend extends Backend<any> {
         return PACKAGES_DIR_PATH;
     }
 
-    static isUpgradable(basicInfo: util.BasicInfo, packageInfo: any): Promise<boolean> {
+    static async isUpgradable(basicInfo: util.BasicInfo, packageInfo: any): Promise<boolean> {
         let info = util.getInfo(packageInfo);
 
-        return FallbackBackend
-            .init()
-            .then(() => {
-                let versionData = info.version
-                return typeof versionData !== 'string'
-                    ? util.retrieveLatestVersion(versionData)
-                    : versionData;
-            }).then((latestVersion) => new Promise<boolean>((resolve) =>
-                fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
-                    let installedPackages = jsonObject || {};
-                    resolve(installedPackages[basicInfo.name]
-                        && installedPackages[basicInfo.name].version !== latestVersion);
-                })));
+        await FallbackBackend.init();
+        let versionData = info.version;
+        const latestVersion = typeof versionData !== 'string'
+            ? await util.retrieveLatestVersion(versionData)
+            : versionData;
+        return await new Promise<boolean>((resolve) => fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
+            let installedPackages = jsonObject || {};
+            resolve(installedPackages[basicInfo.name]
+                && installedPackages[basicInfo.name].version !== latestVersion);
+        }));
     }
 
     private static init(): Promise<any> {
@@ -101,85 +98,85 @@ class FallbackBackend extends Backend<any> {
         return ['darwin', 'freebsd', 'linux', 'win32'];
     }
 
-    packageAvailable(packageInfo: any) {
+    async packageAvailable(packageInfo: any) {
         let info = util.getInfo(packageInfo);
-        return Promise.resolve(!!info.source);
+        return !!info.source;
     }
 
-    install(basicInfo: util.BasicInfo, packageInfo: any, outputListener: (data: string) => void) {
+    async install(basicInfo: util.BasicInfo, packageInfo: any, outputListener: (data: string) => void) {
         let info: Info = util.getInfo(packageInfo);
         let packageUrl: string;
         let version: string;
         let binaries: string[] = [];
 
-        return FallbackBackend
-            .init()
-            .then(() => {
-                let versionData = info.version || basicInfo.version;
-                return typeof versionData !== 'string'
-                    ? util.retrieveLatestVersion(versionData, outputListener)
-                    : versionData;
-            }).then((ver: string) => {
-                outputListener(`Installing ${basicInfo.name} at version ${ver}${os.EOL}`);
-                packageUrl = info.source.replace(/%VERSION%/g, ver);
-                version = ver;
-                return new Promise<string>((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p)));
-            }).then((p: string) => new Promise((resolve) => {
-                outputListener('Downloading package...' + os.EOL);
-                request.get(packageUrl)
-                    .pipe(fs.createWriteStream(p))
-                    .on('close', resolve.bind(null, p));
-            })).then((p: string) => {
-                outputListener('Decompressing package...' + os.EOL);
-                let packagePath = path.join(PACKAGES_DIR_PATH, basicInfo.name);
-                return new Promise((resolve) => fs.remove(packagePath, resolve))
-                    .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
-                    .then(() => packagePath);
-            }).then((packagePath: string) => {
-                if (!info.build) {
-                    return;
+        await FallbackBackend
+            .init();
+        let versionData = info.version || basicInfo.version;
+        const ver = typeof versionData !== 'string'
+            ? await util.retrieveLatestVersion(versionData, outputListener)
+            : versionData;
+
+        outputListener(`Installing ${basicInfo.name} at version ${ver}${os.EOL}`);
+        packageUrl = info.source.replace(/%VERSION%/g, ver);
+        version = ver;
+        const p = await new Promise<string>((resolve) => tmp.file((err, p, fd, cleanup) => resolve(p)));
+
+        await new Promise((resolve) => {
+            outputListener('Downloading package...' + os.EOL);
+            request.get(packageUrl)
+                .pipe(fs.createWriteStream(p))
+                .on('close', resolve);
+        });
+
+        outputListener('Decompressing package...' + os.EOL);
+        let packagePath = path.join(PACKAGES_DIR_PATH, basicInfo.name);
+
+        await new Promise((resolve) => fs.remove(packagePath, resolve))
+            .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
+            .then(() => packagePath);
+
+        if (!info.build) {
+            return;
+        }
+
+        outputListener('Building package...' + os.EOL);
+        let batchPromises = Promise.resolve(null);
+
+        info.build.forEach((batch) => {
+            batchPromises = batchPromises.then(() => {
+                let commandPromises: Promise<any>[] = [];
+
+                for (let command in batch) {
+                    commandPromises.push(new Promise((resolve) => {
+                        cp.exec(command, { cwd: path.join(packagePath, batch[command]) }, resolve);
+                    }));
                 }
 
-                outputListener('Building package...' + os.EOL);
-                let batchPromises = Promise.resolve(null);
+                return Promise.all(commandPromises);
+            });
+        });
 
-                info.build.forEach((batch) => {
-                    batchPromises = batchPromises.then(() => {
-                        let commandPromises: Promise<any>[] = [];
+        await batchPromises;
 
-                        for (let command in batch) {
-                            commandPromises.push(new Promise((resolve) => {
-                                cp.exec(command,
-                                    { cwd: path.join(packagePath, batch[command]) },
-                                    resolve);
-                            }));
-                        }
+        if (!info.bin) {
+            return;
+        }
 
-                        return Promise.all(commandPromises);
-                    });
-                });
+        binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
+        FallbackBackend.completePath();
 
-                return batchPromises;
-            }).then(() => {
-                if (!info.bin) {
-                    return;
-                }
+        const installedPackages = await new Promise((resolve) => {
+            outputListener('Registering package...' + os.EOL);
+            fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => resolve(jsonObject || {}));
+        });
 
-                binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
-                FallbackBackend.completePath();
-            }).then(() => new Promise((resolve) => {
-                outputListener('Registering package...' + os.EOL);
-                fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) =>
-                    resolve(jsonObject || {}));
-            })).then((installedPackages) => {
-                installedPackages[basicInfo.name] = {
-                    version: version,
-                    bin: binaries.map((bin) => path.basename(bin))
-                };
+        installedPackages[basicInfo.name] = {
+            version: version,
+            bin: binaries.map((bin) => path.basename(bin))
+        };
 
-                return new Promise((resolve) =>
-                    fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
-            }).then(() => outputListener('Package installed' + os.EOL));
+        await new Promise((resolve) => fs.writeFile(PACKAGES_DB_PATH, JSON.stringify(installedPackages, null, 4), resolve));
+        return outputListener('Package installed' + os.EOL);
     }
 }
 

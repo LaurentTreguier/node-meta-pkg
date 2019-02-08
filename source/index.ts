@@ -25,30 +25,24 @@ export function registerPackage(pkg: Package): void {
     registeredPackages.set(pkg.name, pkg);
 }
 
-export function isInstalled(packageInfo: PackageInfo): Promise<boolean> {
-    return getPackage(packageInfo)
-        .then((pkg) => pkg.targets.length && pkg.targets.every(util.checkExistence));
+export async function isInstalled(packageInfo: PackageInfo): Promise<boolean> {
+    const pkg = await getPackage(packageInfo);
+    return pkg.targets.length && pkg.targets.every(util.checkExistence);
 }
 
-export function isUpgradable(packageInfo: PackageInfo): Promise<boolean> {
-    return getPackage(packageInfo).then((pkg) =>
-        pkg.backends.fallback
-            ? FallbackBackend.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
-            : Promise.resolve(false));
+export async function isUpgradable(packageInfo: PackageInfo): Promise<boolean> {
+    const pkg = await getPackage(packageInfo);
+    return pkg.backends.fallback
+        ? await FallbackBackend.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
+        : false;
 }
 
-export function getInstallers(packageInfo: PackageInfo): Promise<Installer[]> {
-    let availableBackends: Backend<any>[];
-    let resolvedPackage: Package;
-    return getPackage(packageInfo)
-        .then((pkg) => {
-            availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
-            resolvedPackage = pkg;
-        }).then(() => Promise.all(availableBackends.map((backend) =>
-            backend.packageAvailable(resolvedPackage.backends[backend.name]))))
-        .then((results) => availableBackends.filter((backend, i) => results[i]))
-        .then((actuallyAvailableBackends) =>
-            actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
+export async function getInstallers(packageInfo: PackageInfo): Promise<Installer[]> {
+    const pkg = await getPackage(packageInfo);
+    const availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
+    const results = await Promise.all(availableBackends.map((backend) => backend.packageAvailable(pkg.backends[backend.name])));
+    const actuallyAvailableBackends = availableBackends.filter((backend, i) => results[i]);
+    return actuallyAvailableBackends.map((backend) => new Installer(backend, pkg));
 }
 
 export function addRepo(repo: string): void {
@@ -59,15 +53,15 @@ export function getFallbackPackagesPath(): string {
     return FallbackBackend.packagesPath;
 }
 
-function getPackage(packageInfo: PackageInfo) {
+async function getPackage(packageInfo: PackageInfo) {
     if (typeof (packageInfo) !== 'string') {
         registerPackage(packageInfo);
-        return Promise.resolve(packageInfo);
+        return packageInfo;
     }
 
     return registeredPackages.has(packageInfo)
-        ? Promise.resolve(registeredPackages.get(packageInfo))
-        : repoManager.getPackage(packageInfo);
+        ? registeredPackages.get(packageInfo)
+        : await repoManager.getPackage(packageInfo);
 }
 
 export class Installer {
@@ -87,19 +81,10 @@ export class Installer {
         this._package = pkg;
     }
 
-    install(outputListener?: (data: string) => void) {
-        let alreadyInstalled: boolean;
-        return isInstalled(this._package)
-            .then((installed) => {
-                let basicInfo = {
-                    name: this._package.name,
-                    version: this._package.version
-                };
-
-                alreadyInstalled = installed;
-                return this._backend.install(basicInfo,
-                    this._package.backends[this._backend.name],
-                    outputListener || (() => { }));
-            }).then(() => alreadyInstalled);
+    async install(outputListener?: (data: string) => void) {
+        const installed = await isInstalled(this._package);
+        const basicInfo = { name: this._package.name, version: this._package.version };
+        await this._backend.install(basicInfo, this._package.backends[this._backend.name], outputListener || (() => { }));
+        return installed;
     }
 }

@@ -21,8 +21,8 @@ class BrewBackend extends Backend<string> {
         return ['darwin', 'linux'];
     }
 
-    install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
-        return new Promise<void>((resolve) => {
+    async install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
+        await new Promise((resolve) => {
             cp.spawn(this.command, ['install', packageName])
                 .on('exit', resolve)
                 .stdout.on('data', (data) => outputListener(data.toString()));

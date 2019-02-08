@@ -1,4 +1,12 @@
 'use strict';
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const repo_manager_1 = require("./repo_manager");
 const package_kit_backend_1 = require("./backends/package_kit_backend");
@@ -19,26 +27,29 @@ function registerPackage(pkg) {
 }
 exports.registerPackage = registerPackage;
 function isInstalled(packageInfo) {
-    return getPackage(packageInfo)
-        .then((pkg) => pkg.targets.length && pkg.targets.every(util.checkExistence));
+    return __awaiter(this, void 0, void 0, function* () {
+        const pkg = yield getPackage(packageInfo);
+        return pkg.targets.length && pkg.targets.every(util.checkExistence);
+    });
 }
 exports.isInstalled = isInstalled;
 function isUpgradable(packageInfo) {
-    return getPackage(packageInfo).then((pkg) => pkg.backends.fallback
-        ? fallback_backend_1.default.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
-        : Promise.resolve(false));
+    return __awaiter(this, void 0, void 0, function* () {
+        const pkg = yield getPackage(packageInfo);
+        return pkg.backends.fallback
+            ? yield fallback_backend_1.default.isUpgradable({ name: pkg.name, version: pkg.version }, pkg.backends.fallback)
+            : false;
+    });
 }
 exports.isUpgradable = isUpgradable;
 function getInstallers(packageInfo) {
-    let availableBackends;
-    let resolvedPackage;
-    return getPackage(packageInfo)
-        .then((pkg) => {
-        availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
-        resolvedPackage = pkg;
-    }).then(() => Promise.all(availableBackends.map((backend) => backend.packageAvailable(resolvedPackage.backends[backend.name]))))
-        .then((results) => availableBackends.filter((backend, i) => results[i]))
-        .then((actuallyAvailableBackends) => actuallyAvailableBackends.map((backend) => new Installer(backend, resolvedPackage)));
+    return __awaiter(this, void 0, void 0, function* () {
+        const pkg = yield getPackage(packageInfo);
+        const availableBackends = backends.filter((backend) => pkg.backends[backend.name]);
+        const results = yield Promise.all(availableBackends.map((backend) => backend.packageAvailable(pkg.backends[backend.name])));
+        const actuallyAvailableBackends = availableBackends.filter((backend, i) => results[i]);
+        return actuallyAvailableBackends.map((backend) => new Installer(backend, pkg));
+    });
 }
 exports.getInstallers = getInstallers;
 function addRepo(repo) {
@@ -50,13 +61,15 @@ function getFallbackPackagesPath() {
 }
 exports.getFallbackPackagesPath = getFallbackPackagesPath;
 function getPackage(packageInfo) {
-    if (typeof (packageInfo) !== 'string') {
-        registerPackage(packageInfo);
-        return Promise.resolve(packageInfo);
-    }
-    return registeredPackages.has(packageInfo)
-        ? Promise.resolve(registeredPackages.get(packageInfo))
-        : repoManager.getPackage(packageInfo);
+    return __awaiter(this, void 0, void 0, function* () {
+        if (typeof (packageInfo) !== 'string') {
+            registerPackage(packageInfo);
+            return packageInfo;
+        }
+        return registeredPackages.has(packageInfo)
+            ? registeredPackages.get(packageInfo)
+            : yield repoManager.getPackage(packageInfo);
+    });
 }
 class Installer {
     get name() {
@@ -70,16 +83,12 @@ class Installer {
         this._package = pkg;
     }
     install(outputListener) {
-        let alreadyInstalled;
-        return isInstalled(this._package)
-            .then((installed) => {
-            let basicInfo = {
-                name: this._package.name,
-                version: this._package.version
-            };
-            alreadyInstalled = installed;
-            return this._backend.install(basicInfo, this._package.backends[this._backend.name], outputListener || (() => { }));
-        }).then(() => alreadyInstalled);
+        return __awaiter(this, void 0, void 0, function* () {
+            const installed = yield isInstalled(this._package);
+            const basicInfo = { name: this._package.name, version: this._package.version };
+            yield this._backend.install(basicInfo, this._package.backends[this._backend.name], outputListener || (() => { }));
+            return installed;
+        });
     }
 }
 exports.Installer = Installer;
