@@ -108,28 +108,26 @@ class FallbackBackend extends backend_1.default {
             yield new Promise((resolve) => fs.remove(packagePath, resolve))
                 .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
                 .then(() => packagePath);
-            if (!info.build) {
-                return;
-            }
-            outputListener('Building package...' + os.EOL);
-            let batchPromises = Promise.resolve(null);
-            info.build.forEach((batch) => {
-                batchPromises = batchPromises.then(() => {
-                    let commandPromises = [];
-                    for (let command in batch) {
-                        commandPromises.push(new Promise((resolve) => {
-                            cp.exec(command, { cwd: path.join(packagePath, batch[command]) }, resolve);
-                        }));
-                    }
-                    return Promise.all(commandPromises);
+            if (info.build) {
+                outputListener('Building package...' + os.EOL);
+                let batchPromises = Promise.resolve(null);
+                info.build.forEach((batch) => {
+                    batchPromises = batchPromises.then(() => {
+                        let commandPromises = [];
+                        for (let command in batch) {
+                            commandPromises.push(new Promise((resolve) => {
+                                cp.exec(command, { cwd: path.join(packagePath, batch[command]) }, resolve);
+                            }));
+                        }
+                        return Promise.all(commandPromises);
+                    });
                 });
-            });
-            yield batchPromises;
-            if (!info.bin) {
-                return;
+                yield batchPromises;
             }
-            binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
-            FallbackBackend.completePath();
+            if (info.bin) {
+                binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
+                FallbackBackend.completePath();
+            }
             const installedPackages = yield new Promise((resolve) => {
                 outputListener('Registering package...' + os.EOL);
                 fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => resolve(jsonObject || {}));

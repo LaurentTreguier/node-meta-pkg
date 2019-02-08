@@ -124,35 +124,31 @@ class FallbackBackend extends Backend<any> {
             .then(decompress.bind(null, p, packagePath, { strip: info.strip || 0 }))
             .then(() => packagePath);
 
-        if (!info.build) {
-            return;
-        }
+        if (info.build) {
+            outputListener('Building package...' + os.EOL);
+            let batchPromises = Promise.resolve(null);
 
-        outputListener('Building package...' + os.EOL);
-        let batchPromises = Promise.resolve(null);
+            info.build.forEach((batch) => {
+                batchPromises = batchPromises.then(() => {
+                    let commandPromises: Promise<any>[] = [];
 
-        info.build.forEach((batch) => {
-            batchPromises = batchPromises.then(() => {
-                let commandPromises: Promise<any>[] = [];
+                    for (let command in batch) {
+                        commandPromises.push(new Promise((resolve) => {
+                            cp.exec(command, { cwd: path.join(packagePath, batch[command]) }, resolve);
+                        }));
+                    }
 
-                for (let command in batch) {
-                    commandPromises.push(new Promise((resolve) => {
-                        cp.exec(command, { cwd: path.join(packagePath, batch[command]) }, resolve);
-                    }));
-                }
-
-                return Promise.all(commandPromises);
+                    return Promise.all(commandPromises);
+                });
             });
-        });
 
-        await batchPromises;
-
-        if (!info.bin) {
-            return;
+            await batchPromises;
         }
 
-        binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
-        FallbackBackend.completePath();
+        if (info.bin) {
+            binaries = typeof info.bin !== 'string' ? info.bin : [info.bin];
+            FallbackBackend.completePath();
+        }
 
         const installedPackages = await new Promise((resolve) => {
             outputListener('Registering package...' + os.EOL);
