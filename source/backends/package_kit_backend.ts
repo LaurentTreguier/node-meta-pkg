@@ -8,21 +8,10 @@ import * as util from '../util';
 export type PackageInfo = string | string[];
 
 class PackageKitBackend extends Backend<PackageInfo> {
-    get name() {
-        return 'packagekit';
-    }
-
-    get prettyName() {
-        return 'PackageKit';
-    }
-
-    get command() {
-        return 'pkcon';
-    }
-
-    get platforms() {
-        return ['freebsd', 'linux'];
-    }
+    readonly name = 'packagekit';
+    readonly prettyName = 'PackageKit';
+    readonly command = 'pkcon';
+    readonly platforms = ['freebsd', 'linux'];
 
     async packageAvailable(packageInfo: PackageInfo) {
         return !!(await this.resolvePackageName(packageInfo));

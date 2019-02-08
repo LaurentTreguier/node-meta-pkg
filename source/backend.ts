@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as util from './util';
 
 abstract class Backend<T> {
-    abstract get name(): string;
-    abstract get prettyName(): string;
-    abstract get command(): string;
-    abstract get platforms(): string[];
+    readonly name: string;
+    readonly prettyName: string;
+    readonly command: string;
+    readonly platforms: string[];
     abstract install(basicInfo: util.BasicInfo, packageInfo: T, outputListener: (data: string) => void): PromiseLike<void>;
 
     get available() {

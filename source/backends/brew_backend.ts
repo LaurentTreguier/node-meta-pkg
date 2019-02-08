@@ -5,21 +5,10 @@ import Backend from '../backend';
 import * as util from '../util';
 
 class BrewBackend extends Backend<string> {
-    get name() {
-        return 'brew';
-    }
-
-    get prettyName() {
-        return 'Brew';
-    }
-
-    get command() {
-        return 'brew';
-    }
-
-    get platforms() {
-        return ['darwin', 'linux'];
-    }
+    readonly name = 'brew';
+    readonly prettyName = 'Brew';
+    readonly command = 'brew';
+    readonly platforms = ['darwin', 'linux'];
 
     async install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
         await new Promise((resolve) => {

@@ -11,17 +11,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const cp = require("child_process");
 const backend_1 = require("../backend");
 class BrewBackend extends backend_1.default {
-    get name() {
-        return 'brew';
-    }
-    get prettyName() {
-        return 'Brew';
-    }
-    get command() {
-        return 'brew';
-    }
-    get platforms() {
-        return ['darwin', 'linux'];
+    constructor() {
+        super(...arguments);
+        this.name = 'brew';
+        this.prettyName = 'Brew';
+        this.command = 'brew';
+        this.platforms = ['darwin', 'linux'];
     }
     install(basicInfo, packageName, outputListener) {
         return __awaiter(this, void 0, void 0, function* () {

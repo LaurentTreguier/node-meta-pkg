@@ -6,9 +6,9 @@ declare class FallbackBackend extends Backend<any> {
     private static init;
     private static completePath;
     constructor();
-    readonly name: string;
-    readonly prettyName: string;
-    readonly command: any;
+    readonly name = "fallback";
+    readonly prettyName = "Local install";
+    readonly command = "";
     readonly platforms: string[];
     packageAvailable(packageInfo: any): Promise<boolean>;
     install(basicInfo: util.BasicInfo, packageInfo: any, outputListener: (data: string) => void): Promise<void>;

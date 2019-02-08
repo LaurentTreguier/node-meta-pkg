@@ -12,17 +12,12 @@ const cp = require("child_process");
 const rl = require("readline");
 const backend_1 = require("../backend");
 class PackageKitBackend extends backend_1.default {
-    get name() {
-        return 'packagekit';
-    }
-    get prettyName() {
-        return 'PackageKit';
-    }
-    get command() {
-        return 'pkcon';
-    }
-    get platforms() {
-        return ['freebsd', 'linux'];
+    constructor() {
+        super(...arguments);
+        this.name = 'packagekit';
+        this.prettyName = 'PackageKit';
+        this.command = 'pkcon';
+        this.platforms = ['freebsd', 'linux'];
     }
     packageAvailable(packageInfo) {
         return __awaiter(this, void 0, void 0, function* () {

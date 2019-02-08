@@ -5,21 +5,10 @@ import Backend from '../backend';
 import * as util from '../util';
 
 class ChocolateyBackend extends Backend<string> {
-    get name() {
-        return 'chocolatey';
-    }
-
-    get prettyName() {
-        return 'Chocolatey';
-    }
-
-    get command() {
-        return 'choco';
-    }
-
-    get platforms() {
-        return ['win32'];
-    }
+    readonly name = 'chocolatey';
+    readonly prettyName = 'Chocolatey';
+    readonly command = 'choco';
+    readonly platforms = ['win32'];
 
     async install(basicInfo: util.BasicInfo, packageName: string, outputListener: (data: string) => void) {
         await new Promise((resolve) => {

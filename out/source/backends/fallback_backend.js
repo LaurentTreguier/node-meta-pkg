@@ -27,6 +27,14 @@ const PACKAGES_DIR_PATH = path.join(os.homedir(), DATA_DIR[process.platform] || 
 const PACKAGES_DB = 'packages.json';
 const PACKAGES_DB_PATH = path.join(PACKAGES_DIR_PATH, PACKAGES_DB);
 class FallbackBackend extends backend_1.default {
+    constructor() {
+        super();
+        this.name = 'fallback';
+        this.prettyName = 'Local install';
+        this.command = '';
+        this.platforms = ['darwin', 'freebsd', 'linux', 'win32'];
+        FallbackBackend.completePath();
+    }
     static get packagesPath() {
         return PACKAGES_DIR_PATH;
     }
@@ -66,22 +74,6 @@ class FallbackBackend extends backend_1.default {
                 });
             }
         }
-    }
-    constructor() {
-        super();
-        FallbackBackend.completePath();
-    }
-    get name() {
-        return 'fallback';
-    }
-    get prettyName() {
-        return 'Local install';
-    }
-    get command() {
-        return null;
-    }
-    get platforms() {
-        return ['darwin', 'freebsd', 'linux', 'win32'];
     }
     packageAvailable(packageInfo) {
         return __awaiter(this, void 0, void 0, function* () {

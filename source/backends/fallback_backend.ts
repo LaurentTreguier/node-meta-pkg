@@ -82,21 +82,10 @@ class FallbackBackend extends Backend<any> {
         FallbackBackend.completePath();
     }
 
-    get name() {
-        return 'fallback';
-    }
-
-    get prettyName() {
-        return 'Local install';
-    }
-
-    get command() {
-        return null;
-    }
-
-    get platforms() {
-        return ['darwin', 'freebsd', 'linux', 'win32'];
-    }
+    readonly name = 'fallback';
+    readonly prettyName = 'Local install';
+    readonly command = '';
+    readonly platforms = ['darwin', 'freebsd', 'linux', 'win32'];
 
     async packageAvailable(packageInfo: any) {
         let info = util.getInfo(packageInfo);
