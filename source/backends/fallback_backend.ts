@@ -46,8 +46,8 @@ class FallbackBackend extends Backend<any> {
             : versionData;
         return await new Promise<boolean>((resolve) => fs.readJSON(PACKAGES_DB_PATH, (err, jsonObject) => {
             let installedPackages = jsonObject || {};
-            resolve(installedPackages[basicInfo.name]
-                && installedPackages[basicInfo.name].version !== latestVersion);
+            resolve(!installedPackages[basicInfo.name]
+                || installedPackages[basicInfo.name].version !== latestVersion);
         }));
     }
 
